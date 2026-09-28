@@ -1,8 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="referrer" content="no-referrer">
 <title>Jimitri Dash</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -13,6 +14,9 @@
 <button id="mute" title="Mute (M)">&#128266;</button>
 <button id="pausebtn" class="hidden" title="Pause (ESC)">
   <svg width="22" height="22" viewBox="0 0 20 20"><rect x="3" y="2" width="5" height="16" rx="1.5" fill="#fff"/><rect x="12" y="2" width="5" height="16" rx="1.5" fill="#fff"/></svg>
+</button>
+<button id="edstop" class="hidden" title="Stop playtest (Esc)">
+  <svg width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="#fff"/></svg>
 </button>
 
 <div id="mainmenu" class="overlay">
@@ -47,11 +51,11 @@
     </svg>
     LEVELS
   </button>
-  <div class="sub2">CUBE: TAP TO JUMP &bull; SHIP: HOLD TO FLY &bull; UFO: TAP TO JUMP IN AIR &bull; BALL: TAP TO FLIP GRAVITY &bull; PADS LAUNCH YOU UP &bull; BLUE ORB / PORTALS FLIP GRAVITY</div>
+  <div class="sub2">CUBE: TAP TO JUMP &bull; SHIP: HOLD TO FLY &bull; UFO: TAP TO JUMP IN AIR &bull; BALL: TAP TO FLIP GRAVITY &bull; DASH ORB: HOLD &bull; PINK PORTAL: MINI</div>
 </div>
 
 <div id="levelsscr" class="overlay hidden">
-  <div class="title2">LEVELS</div>
+  <div class="title2">MAIN LEVELS</div>
   <div id="levels"></div>
   <button class="navbtn" id="backlevels">BACK</button>
 </div>
@@ -89,54 +93,49 @@
   <button class="navbtn" id="backicons">BACK</button>
 </div>
 
-<div id="editorui" class="hidden">
-  <div id="toolbar"></div>
-  <div id="edbottomwrap">
-    <div id="edhint"></div>
-    <div id="trigcfg" class="hidden"></div>
-    <div id="edselbar">
-      <span id="edselinfo">Sel: 0</span>
-      <button class="edbtn" id="ednudgeL">&#9664; 10px</button>
-      <button class="edbtn" id="ednudgeR">10px &#9654;</button>
-      <button class="edbtn" id="ednudgeU">&#9650; 10px</button>
-      <button class="edbtn" id="ednudgeD">&#9660; 10px</button>
-      <button class="edbtn" id="edgroup">SET GROUP</button>
-      <span class="edlaylab">Layer</span><select id="edlayer"></select>
-      <button class="edbtn" id="edsetlayer">SET LAYER</button>
-      <button class="edbtn red" id="eddel">DELETE</button>
-    </div>
-    <div id="edbottom">
-      <input id="edname" maxlength="20" value="UNNAMED" placeholder="LEVEL NAME">
-      <select id="edmusic" title="Music"></select>
-      <input id="edmusoffset" type="number" min="0" step="0.5" value="0" title="Music start offset (seconds)">
-      <input id="edobjcolor" type="color" title="Object colour" value="#ffffff">
-      <button class="edbtn green" id="edtest">&#9654; TEST</button>
-      <button class="edbtn" id="edsave">SAVE</button>
-      <button class="edbtn" id="edupload">UPLOAD</button>
-      <button class="edbtn red" id="edclear">CLEAR</button>
-      <button class="edbtn" id="edexit">EXIT</button>
-    </div>
-  </div>
-</div>
+<div id="editorui" class="hidden"></div>
 
 <div id="pausescr" class="overlay hidden">
   <div class="title2">PAUSED</div>
-  <div class="mrow">
-    <button class="navbtn" id="presume">RESUME</button>
+  <div class="mrow wrap">
+    <button class="navbtn green" id="presume">RESUME</button>
     <button class="navbtn" id="prestart">RESTART</button>
+    <button class="navbtn" id="ppractice">PRACTICE: OFF</button>
     <button class="navbtn" id="pexit">EXIT</button>
+  </div>
+  <div class="pbox">
+    <div class="plab">MACRO BOT</div>
+    <div class="mrow wrap">
+      <button class="navbtn" id="mrec">&#9679; RECORD</button>
+      <button class="navbtn" id="mplay">&#9654; BOT: OFF</button>
+      <button class="navbtn" id="msave">SAVE FILE</button>
+      <button class="navbtn" id="mload">LOAD FILE</button>
+    </div>
+    <div class="mrow wrap">
+      <label class="plab2">GAME SPEED
+        <select id="mspeed">
+          <option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="0.75">0.75x</option>
+          <option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option>
+        </select>
+      </label>
+      <label class="plab2">CAMERA ZOOM <input type="range" id="pcam" min="9" max="30" step="1"> <span id="pcamv"></span> blocks tall</label>
+    </div>
+    <div class="sub2" id="macroinfo"></div>
+    <div class="sub2">R restart &bull; P practice &bull; Z / X add / remove checkpoint</div>
   </div>
 </div>
 
 <div id="winscr" class="overlay hidden">
-  <div class="title" style="color:#7CFC66">LEVEL COMPLETE!</div>
+  <div class="title" style="color:#7CFC66" id="wintitle">LEVEL COMPLETE!</div>
   <div class="sub">CLICK TO CONTINUE</div>
 </div>
 
 <div id="toast"></div>
 
+<script src="mainlevels.js"></script>
 <script src="game.js"></script>
+<script src="render.js"></script>
+<script src="editor.js"></script>
+<script>boot();</script>
 </body>
 </html>
-
-
