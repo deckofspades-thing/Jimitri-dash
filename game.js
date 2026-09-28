@@ -182,6 +182,10 @@ function startSong(tr, at){
   const a=tr&&tr.file ? audioFor(tr.file) : null; if(!a) return;
   if(songAudio && songAudio!==a) stopSong();
   songAudio=a;
+  if(tr.ng && !a._errHooked){
+    a._errHooked=true;
+    a.addEventListener('error', function(){ if(songAudio===a) toast('Newgrounds song #'+tr.ng+' did not load (NG Guard or downloads off)'); });
+  }
   a.volume=(tr.vol!=null?tr.vol:0.6);
   a.muted=muted;
   try{ a.playbackRate=speedHack; }catch(e){}

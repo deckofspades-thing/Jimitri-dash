@@ -1073,6 +1073,13 @@ function openSettings(){
     stat.textContent='Loading Newgrounds #'+id+'...';
     ngCheck(id, function(ok, msg){
       stat.textContent=msg;
+      if(!ok){
+        const a=document.createElement('a');
+        a.className='pbtn blue small'; a.target='_blank'; a.rel='noopener noreferrer';
+        a.href='https://www.newgrounds.com/audio/listen/'+id;
+        a.textContent='OPEN SONG PAGE ↗';
+        stat.appendChild(document.createElement('br')); stat.appendChild(a);
+      }
       if(ok){ setSongD({t:'ng', id:id, n:name||''}); $('sNgId').value=id; }
     });
   }
@@ -1142,8 +1149,9 @@ function ngCheck(id, cb){
     if(a.duration && a.duration<11) fin(false,'Newgrounds only sent its 10-second hotlink preview. Open the game from the folder or its own site and try again.');
     else fin(true,'Loaded Newgrounds #'+id+(a.duration?(' ('+Math.floor(a.duration/60)+':'+('0'+Math.floor(a.duration%60)).slice(-2)+')'):'')+' - it\'s now the level song.');
   }
-  function onErr(){ fin(false,'Couldn\'t load #'+id+'. The ID may be wrong, the artist may have turned off downloads, or Newgrounds is rate-limiting - wait a minute and retry.'); }
-  const tm=setTimeout(function(){ fin(false,'Newgrounds took too long to answer. Try again in a bit.'); }, 15000);
+  const why=' Open the song page: if it says NG Guard, Newgrounds is blocking your connection for a while. You can always download the mp3 there and add it under MY FILES or GAME FOLDER instead.';
+  function onErr(){ fin(false,'Couldn\'t load #'+id+'. The ID may be wrong or the artist turned off downloads.'+why); }
+  const tm=setTimeout(function(){ fin(false,'Newgrounds didn\'t answer.'+why); }, 9000);
   if(a.readyState>=1 && a.duration){ onMeta(); return; }
   a.addEventListener('loadedmetadata', onMeta);
   a.addEventListener('error', onErr);
