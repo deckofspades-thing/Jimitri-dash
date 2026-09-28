@@ -1035,6 +1035,7 @@ function openSettings(){
   h+='<div class="spane" data-p="f">'+fieldRow('FILE NAME','<input type="text" id="sFile" placeholder="mysong.mp3" value="'+escHtml(s.t==='f'?s.p:'')+'">')
     +'<div class="mrowb"><button class="pbtn green" id="sFileUse">USE</button></div>'
     +'<div class="mhint">Put an mp3 next to index.html. Best choice for main levels - it works for everyone who gets the game folder.</div></div>';
+  h+=fieldRow('VOLUME (whole game)', '<input type="range" id="sVol" min="0" max="100" step="1" value="'+Math.round(OPT.vol*100)+'">');
   h+=fieldRow('START OFFSET (s)', '<input type="number" id="sOff" min="0" step="0.1" value="'+(+ED.mo||0)+'">');
   h+='<div class="mrowb"><button class="pbtn green" id="sPrev">&#9654; PREVIEW SONG</button></div>';
   h+='<div class="msec">LOOK</div>';
@@ -1127,6 +1128,7 @@ function openSettings(){
     if(settingsPreview){ settingsPreview=false; musicStop(); this.innerHTML='&#9654; PREVIEW SONG'; }
     else { settingsPreview=true; playSettingsPreview(); this.innerHTML='&#9632; STOP PREVIEW'; }
   });
+  $('sVol').addEventListener('input', function(){ setVolume((+this.value||0)/100); });
   $('sBg').addEventListener('change', function(){ u(); ED.bg=+this.value; saveDraft(true); });
   $('sGr').addEventListener('change', function(){ u(); ED.gr=+this.value; saveDraft(true); });
   box.querySelectorAll('input[data-cc]').forEach(function(inp){

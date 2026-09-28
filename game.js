@@ -41,8 +41,8 @@ function setView(blocks, top){ Z=SH/(blocks*B); W=SW/Z; H=SH/Z; VT=top; }
 function applyView(){ ctx.setTransform(dpr*Z,0,0,dpr*Z,0,-VT*Z*dpr); }
 function hudView(){ ctx.setTransform(dpr,0,0,dpr,0,0); }
 const OPT=(function(){
-  const o={cam:13};
-  try{ const s=JSON.parse(localStorage.getItem('jd_opts')||'{}'); if(s.cam) o.cam=Math.max(9,Math.min(30,+s.cam||13)); }catch(e){}
+  const o={cam:13, vol:0.6};
+  try{ const s=JSON.parse(localStorage.getItem('jd_opts')||'{}'); if(s.cam) o.cam=Math.max(9,Math.min(30,+s.cam||13)); if(s.vol!=null) o.vol=Math.max(0,Math.min(1,+s.vol||0)); }catch(e){}
   return o;
 })();
 function saveOpt(){ try{ localStorage.setItem('jd_opts', JSON.stringify(OPT)); }catch(e){} }
@@ -186,7 +186,7 @@ function startSong(tr, at){
     a._errHooked=true;
     a.addEventListener('error', function(){ if(songAudio===a) toast('Newgrounds song #'+tr.ng+' did not load (NG Guard or downloads off)'); });
   }
-  a.volume=(tr.vol!=null?tr.vol:0.6);
+  a.volume=trackVol(tr);
   a.muted=muted;
   try{ a.playbackRate=speedHack; }catch(e){}
   if(at!=null){
@@ -244,10 +244,10 @@ function customSongURL(key){
 }
 function trackFor(s){
   s=s||{t:'b',i:0};
-  if(s.t==='ng') return {name:s.n||('NEWGROUNDS #'+s.id), file:ngURL(s.id), vol:0.6, bpm:128, ng:s.id};
-  if(s.t==='f') return {name:s.p, file:s.p, vol:0.6, bpm:128};
+  if(s.t==='ng') return {name:s.n||('NEWGROUNDS #'+s.id), file:ngURL(s.id), vol:0.45, bpm:128, ng:s.id};
+  if(s.t==='f') return {name:s.p, file:s.p, vol:0.45, bpm:128};
   if(s.t==='c'){
-    const tr={name:s.n||'MY SONG', file:customURLs[s.k]||null, vol:0.6, bpm:128, ck:s.k};
+    const tr={name:s.n||'MY SONG', file:customURLs[s.k]||null, vol:0.45, bpm:128, ck:s.k};
     if(!tr.file) customSongURL(s.k).then(function(u){
       if(!u){ if(TR===tr) toast('That custom song is not saved on this device'); return; }
       tr.file=u;
@@ -293,7 +293,7 @@ function initAudio(){
   }
   try{
     AC = new (window.AudioContext||window.webkitAudioContext)();
-    master = AC.createGain(); master.gain.value = muted?0:0.45;
+    master = AC.createGain(); master.gain.value = muted?0:0.75*OPT.vol;
     master.connect(AC.destination);
     noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
     const d = noiseBuf.getChannelData(0);
@@ -385,9 +385,15 @@ function winSfx(){
     o.start(t+i*0.12); o.stop(t+i*0.12+0.32);
   });
 }
+function trackVol(tr){ return Math.max(0,Math.min(1,(tr&&tr.vol!=null?tr.vol:0.45)*OPT.vol/0.6)); }
+function applyVolume(){
+  if(master) master.gain.value = muted?0:0.75*OPT.vol;
+  if(songAudio && TR) songAudio.volume=trackVol(TR);
+}
+function setVolume(v){ OPT.vol=Math.max(0,Math.min(1,v)); saveOpt(); applyVolume(); }
 function toggleMute(){
   muted=!muted;
-  if(master) master.gain.value = muted?0:0.45;
+  applyVolume();
   if(songAudio) songAudio.muted = muted;
   muteBtn.innerHTML = muted ? '&#128263;' : '&#128266;';
 }
@@ -1193,6 +1199,7 @@ function updatePauseUI(){
   $('mplay').classList.toggle('green', macro.play);
   $('mspeed').value=''+speedHack;
   $('pcam').value=''+OPT.cam; $('pcamv').textContent=OPT.cam;
+  $('pvol').value=''+Math.round(OPT.vol*100); $('pvolv').textContent=Math.round(OPT.vol*100)+'%';
   $('macroinfo').textContent = macro.ev.length
     ? ('Macro: '+macro.ev.length+' inputs'+(macro.play?' - bot is playing, restart to watch it from the start':''))
     : 'No macro for this level yet. RECORD, then beat the level (practice deaths are cut out).';
@@ -1472,7 +1479,8 @@ $('msave').addEventListener('click', function(e){ e.stopPropagation(); downloadM
 $('mload').addEventListener('click', function(e){ e.stopPropagation(); uploadMacro(); });
 $('mspeed').addEventListener('change', function(){ setSpeedHack(+this.value||1); });
 $('pcam').addEventListener('input', function(){ OPT.cam=+this.value||13; $('pcamv').textContent=OPT.cam; saveOpt(); });
-['mspeed','pcam'].forEach(function(id){ $(id).addEventListener('pointerdown', function(e){ e.stopPropagation(); }); });
+$('pvol').addEventListener('input', function(){ setVolume((+this.value||0)/100); $('pvolv').textContent=this.value+'%'; });
+['mspeed','pcam','pvol'].forEach(function(id){ $(id).addEventListener('pointerdown', function(e){ e.stopPropagation(); }); });
 function isTyping(e){
   const t=e.target; return t && (t.tagName==='INPUT' || t.tagName==='SELECT' || t.tagName==='TEXTAREA');
 }
