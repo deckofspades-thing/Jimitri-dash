@@ -1446,7 +1446,7 @@ $('importbtn').addEventListener('click', function(e){
 });
 $('presume').addEventListener('click', function(e){ e.stopPropagation(); togglePause(); });
 function restartAttempt(){
-  attempts++; practice=false; reset(); updatePauseUI();
+  attempts++; reset(); updatePauseUI();
 }
 $('prestart').addEventListener('click', function(e){
   e.stopPropagation();
@@ -1732,7 +1732,7 @@ function step(){
     }
   }
 
-  if(pressBuf>0 && curL.orbs){
+  if(pressBuf>((mode==='ship'||mode==='wave')&&!dash?6:0) && curL.orbs){
     for(let i=0;i<curL.orbs.length;i++){
       if(orbUsed[i]) continue;
       const o=curL.orbs[i], sc=o.sc||1;
