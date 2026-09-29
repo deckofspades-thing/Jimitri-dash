@@ -1445,8 +1445,10 @@ $('importbtn').addEventListener('click', function(e){
   toast('Imported "'+d.name+'"!');
 });
 $('presume').addEventListener('click', function(e){ e.stopPropagation(); togglePause(); });
-function restartAttempt(){
-  attempts++; reset(); updatePauseUI();
+function restartAttempt(full){
+  if(!full && practice && checkpoints.length && !macro.play && state==='play') respawnCheckpoint();
+  else { attempts++; reset(); }
+  updatePauseUI();
 }
 $('prestart').addEventListener('click', function(e){
   e.stopPropagation();
@@ -1465,14 +1467,14 @@ $('ppractice').addEventListener('click', function(e){
 $('mrec').addEventListener('click', function(e){
   e.stopPropagation();
   macro.rec=!macro.rec;
-  if(macro.rec){ macro.play=false; toast('Recording from the next restart. Practice deaths get cut out.'); restartAttempt(); }
+  if(macro.rec){ macro.play=false; toast('Recording from the next restart. Practice deaths get cut out.'); restartAttempt(true); }
   updatePauseUI();
 });
 $('mplay').addEventListener('click', function(e){
   e.stopPropagation();
   if(!macro.play && !macro.ev.length){ toast('No macro yet - RECORD one or LOAD a file'); return; }
   macro.play=!macro.play;
-  if(macro.play){ macro.rec=false; practice=false; held=false; restartAttempt(); }
+  if(macro.play){ macro.rec=false; practice=false; held=false; restartAttempt(true); }
   updatePauseUI();
 });
 $('msave').addEventListener('click', function(e){ e.stopPropagation(); downloadMacro(); });
