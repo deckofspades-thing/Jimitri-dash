@@ -1631,10 +1631,10 @@ function step(){
   } else if(orbHit){
   } else if(mode==='ship'){
     const k=mini?1.15:1;
-    P.vy += held ? -0.017*B*gdir*k : 0.013*B*gdir*k;
-    const mv=0.30*B;
-    if(P.vy >  mv) P.vy =  mv;
-    if(P.vy < -mv) P.vy = -mv;
+    P.vy += held ? -0.0175*B*gdir*k : 0.0115*B*gdir*k;
+    const up=0.30*B, down=0.27*B;
+    if(gdir>0){ if(P.vy > down) P.vy = down; if(P.vy < -up) P.vy = -up; }
+    else { if(P.vy < -down) P.vy = -down; if(P.vy > up) P.vy = up; }
   } else if(mode==='wave'){
     P.vy = (held ? -1 : 1) * spd * gdir * (mini?2:1);
   } else if(mode==='ball'){
