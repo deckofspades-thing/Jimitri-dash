@@ -1055,6 +1055,32 @@ function drawPlayer(){
   }
   ctx.restore();
 }
+const WAVE_COLS=['82,232,92','79,195,255','255,111,157','255,216,74','180,124,255','255,122,47','68,240,210','240,92,255','156,255,74','255,80,80'];
+function drawWaveTrail(){
+  if(!waveTrail.length) return;
+  const col=WAVE_COLS[selectedIcons.wave|0]||WAVE_COLS[0], fade=12*B;
+  const hx=P.x+PB/2-camX;
+  const gc=ctx.createLinearGradient(hx-fade,0,hx,0);
+  gc.addColorStop(0,'rgba('+col+',0)'); gc.addColorStop(1,'rgba('+col+',0.85)');
+  const gw=ctx.createLinearGradient(hx-fade,0,hx,0);
+  gw.addColorStop(0,'rgba(255,255,255,0)'); gw.addColorStop(1,'rgba(255,255,255,0.9)');
+  ctx.save(); ctx.lineJoin='round'; ctx.lineCap='round';
+  for(let k=0;k<waveTrail.length;k++){
+    const p=waveTrail[k].pts, w=waveTrail[k].w, n=p.length/2;
+    if(n<2 || p[p.length-2]-camX<-B) continue;
+    ctx.beginPath();
+    let started=false;
+    for(let i=0;i<n;i++){
+      const x=p[i*2]-camX;
+      if(x<hx-fade-B && i<n-1 && p[i*2+2]-camX<hx-fade-B) continue;
+      if(!started){ ctx.moveTo(x,p[i*2+1]); started=true; } else ctx.lineTo(x,p[i*2+1]);
+    }
+    if(!started) continue;
+    ctx.strokeStyle=gc; ctx.lineWidth=w*0.42; ctx.stroke();
+    ctx.strokeStyle=gw; ctx.lineWidth=w*0.14; ctx.stroke();
+  }
+  ctx.restore();
+}
 function drawCheckpoints(){
   for(let i=0;i<checkpoints.length;i++){
     const cp=checkpoints[i].P, x=cp.x-camX+B/2, y=cp.y+B/2;
@@ -1149,6 +1175,7 @@ function renderGame(){
   }
   if(edt) drawTrail(edTrail, 0.5);
 
+  drawWaveTrail();
   if(!P.dead) drawPlayer();
 
   if(P.dead){

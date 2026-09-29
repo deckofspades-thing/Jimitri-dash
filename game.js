@@ -736,7 +736,7 @@ let gdir=1, flipQueued=false, gravSwing=0, dash=null;
 let groupOff={}, groupLeg={}, groupTarget={}, groupTimed={}, moveAnims=[];
 let groupAlpha={}, alphaAnims=[];
 let chCur={}, chAnims=[];
-let simTick=0, musicStartT=0;
+let simTick=0, musicStartT=0, waveTrail=[];
 let playCtx={type:'campaign', li:0};
 let spawnStart=null;
 let practice=false, checkpoints=[], lastCpTick=0;
@@ -859,7 +859,7 @@ function reset(){
   speedHit = new Array((L.speeds||[]).length).fill(false);
   orbUsed = new Array((L.orbs||[]).length).fill(false); pressBuf=0;
   padCool = new Array((L.pads||[]).length).fill(0);
-  simTick=0; checkpoints=[]; lastCpTick=0;
+  simTick=0; checkpoints=[]; lastCpTick=0; waveTrail=[];
   if(state==='play' && (playCtx.type==='test'||playCtx.type==='edtest') && spawnStart) applyStartPos(spawnStart);
   musicStartT = P.x>0 ? timeAtX(L, P.x) : 0;
   camX = P.x - playerScreenX();
@@ -929,7 +929,7 @@ function removeCheckpoint(){
 }
 function respawnCheckpoint(){
   const cp=checkpoints[checkpoints.length-1];
-  restoreState(cp); deadT=0; particles.length=0; attempts++; lastCpTick=simTick;
+  restoreState(cp); deadT=0; particles.length=0; attempts++; lastCpTick=simTick; waveTrail=[];
   if(macro.rec && !macro.play){
     macro.ev=macro.ev.filter(function(e){ return e[0]<simTick; });
     let implied=false;
@@ -1805,11 +1805,6 @@ function step(){
     }
   } else if(mode==='wave'){
     P.rot += (((held?-1:1)*gdir*(mini?1.107:Math.PI/4)) - P.rot)*0.5;
-    if(ftick%2===0){
-      particles.push({x:P.x+PB*0.3, y:P.y+PB/2,
-        vx:-(2+Math.random()*2), vy:0,
-        g:0, life:14, max:14, size:PB*0.12, col:'120,200,255'});
-    }
   } else if(mode==='ball'){
     P.rot += (SPEED*speedMult/PB)*0.95*gdir;
     if(P.onGround && ftick%3===0){
@@ -1837,6 +1832,16 @@ function step(){
     P.rot += ROTS*gdir/jm;
   }
 
+  let seg=waveTrail[waveTrail.length-1];
+  if(mode==='wave' && !dash){
+    if(!seg || seg.done){ seg={pts:[], w:PB}; waveTrail.push(seg); }
+    seg.pts.push(P.x+PB/2, P.y+PB/2);
+  } else if(seg) seg.done=true;
+  while(waveTrail.length){
+    const f=waveTrail[0].pts;
+    while(f.length>4 && f[2]<P.x-30*B) f.splice(0,2);
+    if(waveTrail[0].done && (f.length<4 || f[f.length-2]<P.x-30*B)) waveTrail.shift(); else break;
+  }
   shipAnim += (((mode==='ship'||mode==='ball'||mode==='wave')?1:0) - shipAnim)*0.08;
   updateAnims();
   simTick++;
