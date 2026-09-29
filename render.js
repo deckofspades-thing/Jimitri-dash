@@ -37,7 +37,8 @@ const BGD=(function(){
   for(let i=0;i<60;i++) D.hexlit.push(rnd());
   return D;
 })();
-function skyY(f){ return VT + f*(groundY-VT); }
+let BVT=0;
+function skyY(f){ return BVT + f*(groundY-BVT); }
 
 function bgCity(c){
   const D=BGD;
@@ -108,7 +109,7 @@ function bgCity(c){
   const ps=B*4, off=-((camX*0.4)%(ps*2));
   ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=2;
   for(let x=off-ps*2; x<W+ps; x+=ps*2)
-    for(let y=VT+H*0.08; y<groundY-ps; y+=ps*1.6)
+    for(let y=BVT+H*0.08; y<groundY-ps; y+=ps*1.6)
       ctx.strokeRect(x,y,ps,ps);
 }
 function bgSpace(c){
@@ -124,7 +125,7 @@ function bgSpace(c){
     const sx=wrap(st.x*B - camX*(0.03+st.b*0.06), W+200)-100;
     const a=st.b*(0.45+0.4*Math.abs(Math.sin(ftick*0.03+st.tw)));
     ctx.fillStyle='rgba(255,255,255,'+a+')';
-    ctx.fillRect(sx, VT+st.y*(groundY-VT), st.r, st.r);
+    ctx.fillRect(sx, BVT+st.y*(groundY-BVT), st.r, st.r);
   }
   const px=wrap(W*0.72 - camX*0.02, W+10*B)-4*B, py=skyY(0.3), pr=2.6*B;
   const pg=ctx.createLinearGradient(px-pr,py-pr,px+pr,py+pr);
@@ -202,7 +203,7 @@ function bgHex(c){
   const r=1.3*B, hw=r*Math.sqrt(3), off=wrap(camX*0.3, hw), lc=mixW(c,0.4);
   ctx.lineWidth=2;
   let row=0;
-  for(let y=VT-r; y<groundY+r; y+=r*1.5, row++){
+  for(let y=BVT-r; y<groundY+r; y+=r*1.5, row++){
     for(let col=-1, x=-off-hw+(row&1?hw/2:0); x<W+hw; x+=hw, col++){
       const idx=Math.floor((x+camX*0.3)/hw)+row*7;
       const lit=BGD.hexlit[((idx%60)+60)%60];
@@ -232,7 +233,7 @@ function bgClouds(c){
   });
 }
 function bgCircuit(c){
-  const lc=mixW(c,0.5), span=130*B, top=VT, hh=groundY-VT;
+  const lc=mixW(c,0.5), span=130*B, top=BVT, hh=groundY-BVT;
   ctx.lineWidth=3; ctx.lineJoin='round';
   BGD.traces.forEach(function(t){
     const ox=wrap(t.pts[0][0]*B - camX*0.35, span)-10*B - t.pts[0][0]*B;
@@ -255,7 +256,7 @@ function bgCircuit(c){
 function bgSquares(c){
   const s=3.6*B, gap=0.35*B, off=wrap(camX*0.25, s+gap), lc=mixW(c,0.3);
   let row=0;
-  for(let y=groundY-s-gap*0.5; y>VT-s; y-=s+gap, row++){
+  for(let y=groundY-s-gap*0.5; y>BVT-s; y-=s+gap, row++){
     for(let x=-off-(row&1?(s+gap)/2:0); x<W+s; x+=s+gap){
       ctx.fillStyle=rgbA(c,0.72,0.35);
       ctx.fillRect(x,y,s,s);
@@ -267,18 +268,22 @@ function bgSquares(c){
 const BG_DRAW=[bgCity,bgSpace,bgSynth,bgMountains,bgOcean,bgHex,bgClouds,bgCircuit,bgSquares,function(){}];
 function drawBackground(L){
   const c=chCur[CH_BG]||[40,90,200], lift=1+pulse*0.18;
-  const g=ctx.createLinearGradient(0,VT,0,groundY);
+  const up=Math.max(0,(groundY-H*0.8)-VT)*0.9;
+  BVT=VT+up;
+  ctx.save(); ctx.translate(0,-up);
+  const g=ctx.createLinearGradient(0,BVT,0,groundY);
   g.addColorStop(0, rgbA(c,lift,1));
   g.addColorStop(1, rgbA(c,0.38*lift,1));
-  ctx.fillStyle=g; ctx.fillRect(0,VT,W,groundY-VT+2);
+  ctx.fillStyle=g; ctx.fillRect(0,BVT,W,Math.max(H,groundY-BVT)+2);
   (BG_DRAW[L.bg|0]||bgCity)(c);
+  ctx.restore();
 }
 function drawDust(){
   const D=BGD;
   for(let i=0;i<D.dust.length;i++){
     const d=D.dust[i];
     const sx=wrap(d.x*B - camX*1.18, W+240)-120;
-    const sy=skyY(d.y) + Math.sin(ftick*0.012+d.ph)*18;
+    const sy=VT + d.y*H + Math.sin(ftick*0.012+d.ph)*18;
     ctx.fillStyle='rgba(255,255,255,'+(0.08+0.07*Math.abs(Math.sin(ftick*0.02+d.ph)))+')';
     ctx.fillRect(sx, sy, d.r*1.6, d.r*1.6);
   }

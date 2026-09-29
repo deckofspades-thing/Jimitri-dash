@@ -1668,11 +1668,11 @@ function step(){
 
   if(gdir>0){
     if(P.y + PB - hbi >= groundY){ P.y = groundY - PB + hbi; P.vy = 0; P.onGround = true; }
-    if(soft && P.y + hbi <= ceilingY()){
+    if(soft && mode!=='cube' && P.y + hbi <= ceilingY()){
       P.y = ceilingY() - hbi; P.vy = 0; if(mode==='ball') P.onGround = true;
     }
   } else {
-    if(P.y + hbi <= ceilingY()){
+    if(mode!=='cube' && P.y + hbi <= ceilingY()){
       P.y = ceilingY() - hbi; P.vy = 0; P.onGround = true;
     }
     if(soft && P.y + PB - hbi >= groundY){
@@ -1745,7 +1745,7 @@ function step(){
   }
 
   if(mode==='cube' && !dash){
-    if(gdir>0 && P.y + hbi <= ceilingY()){ die(); updateParticles(); return; }
+    if(P.y + hbi <= groundY-500*B){ die(); updateParticles(); return; }
     if(gdir<0 && P.y + PB - hbi >= groundY){ die(); updateParticles(); return; }
   }
 

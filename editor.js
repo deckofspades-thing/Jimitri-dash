@@ -278,7 +278,7 @@ function pasteColor(){
 function sameObj(a,b){ return JSON.stringify(packObj(a))===JSON.stringify(packObj(b)); }
 function placeAt(gx,gy){
   const it=ITEM_BY_ID[edItem]; if(!it) return;
-  if(gy<-4 || gy>40) return;
+  if(gy<-4 || gy>500) return;
   const raw=it.make(gx,gy);
   if(edLayer>0) raw.el=edLayer;
   const o=normObj(it.k, raw); if(!o) return;
@@ -532,7 +532,7 @@ function zoomBy(f, sx, sy){
 }
 function clampCam(){
   edCamX=Math.max(-20*B, edCamX);
-  edVT=Math.max(groundY-60*B, Math.min(groundY+4*B, edVT));
+  edVT=Math.max(groundY-520*B, Math.min(groundY+4*B, edVT));
 }
 
 // ---------- enter / leave ----------
