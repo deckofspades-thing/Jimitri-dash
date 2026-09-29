@@ -1780,8 +1780,7 @@ function step(){
           snapGravity(-gdir, false);
         } else {
           const f = pd.k==='p' ? 0.85 : 1.2;
-          const sgn = pd._ceil ? 1 : -1;
-          P.vy = sgn*JUMPV*f*gdir*jm; P.onGround=false;
+          P.vy = -JUMPV*f*gdir*jm; P.onGround=false;
         }
         for(let j=0;j<12;j++){
           const a=Math.random()*Math.PI*2, v=B*(0.05+Math.random()*0.09);
