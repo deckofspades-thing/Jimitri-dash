@@ -1718,6 +1718,7 @@ function step(){
     const L=(cx-b._hw)*B, R=(cx+b._hw)*B, T=groundY-(cy+b._hh)*B, BO=groundY-(cy-b._hh)*B;
     if(P.x+PB-hbi-2 <= L || P.x+hbi+2 >= R) continue;
     if(P.y+PB-hbi <= T || P.y+hbi >= BO) continue;
+    if(mode==='wave' && !dash){ die(); updateParticles(); return; }
     if(gdir>0){
       if(P.vy >= 0 && prevPB <= T + Math.max(10, P.vy*1.5)){
         P.y = T - PB + hbi; P.vy = 0; P.onGround = true;
