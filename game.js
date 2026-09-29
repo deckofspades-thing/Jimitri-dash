@@ -1593,9 +1593,40 @@ function step(){
   }
 
   const gsw = gravSwing>0 ? 0.16 : 1, jm = mini ? 0.8 : 1;
+  let orbHit=false;
+  if(pressBuf>((mode==='ship'||mode==='wave')&&!dash?6:0) && curL.orbs){
+    for(let i=0;i<curL.orbs.length;i++){
+      if(orbUsed[i]) continue;
+      const o=curL.orbs[i], sc=o.sc||1;
+      const dx=P.x+PB/2-(egx(o)+0.5)*B, dy=P.y+PB/2-(groundY-(egy(o)+0.5)*B);
+      if(dx*dx+dy*dy >= 1.1*B*B*sc*sc) continue;
+      orbUsed[i]=true; pressBuf=0; orbHit=true;
+      let col='255,225,77';
+      if(o.k==='b'){ snapGravity(-gdir, false); P.vy=gdir*JUMPV*0.28; col='70,150,255'; }
+      else if(o.k==='d'){
+        let a=((o.rot||0)%360+540)%360-180;
+        if(a>90) a=180-a; else if(a<-90) a=-180-a;
+        a=Math.max(-70,Math.min(70,a));
+        dash={t:Math.tan(a*Math.PI/180)};
+        P.vy=SPEED*speedMult*dash.t; P.onGround=false; col='80,255,120';
+      } else {
+        let f;
+        if(mode==='ship') f = o.k==='r'?1.0 : o.k==='k'?-0.8 : 0.8;
+        else if(mode==='ball') f = o.k==='p'?0.7 : o.k==='r'?1.25 : o.k==='k'?-1.0 : 0.95;
+        else f = o.k==='p'?0.75 : o.k==='r'?1.32 : o.k==='k'?-1.1 : 1;
+        P.vy = -JUMPV*gdir*f*jm;
+        P.onGround=false;
+        col = o.k==='p' ? '255,123,213' : o.k==='r' ? '255,70,70' : o.k==='k' ? '40,40,40' : '255,225,77';
+      }
+      burst(P.x+PB/2, P.y+PB/2, col, 10);
+      orbSfx();
+      break;
+    }
+  }
   if(dash && !held) dash=null;
   if(dash){
     P.vy = SPEED*speedMult*dash.t;
+  } else if(orbHit){
   } else if(mode==='ship'){
     const k=mini?1.15:1;
     P.vy += held ? -0.017*B*gdir*k : 0.013*B*gdir*k;
@@ -1732,35 +1763,6 @@ function step(){
     }
   }
 
-  if(pressBuf>((mode==='ship'||mode==='wave')&&!dash?6:0) && curL.orbs){
-    for(let i=0;i<curL.orbs.length;i++){
-      if(orbUsed[i]) continue;
-      const o=curL.orbs[i], sc=o.sc||1;
-      const dx=P.x+PB/2-(egx(o)+0.5)*B, dy=P.y+PB/2-(groundY-(egy(o)+0.5)*B);
-      if(dx*dx+dy*dy >= 1.1*B*B*sc*sc) continue;
-      orbUsed[i]=true; pressBuf=0;
-      let col='255,225,77';
-      if(o.k==='b'){ toggleGravity(); col='70,150,255'; }
-      else if(o.k==='d'){
-        let a=((o.rot||0)%360+540)%360-180;
-        if(a>90) a=180-a; else if(a<-90) a=-180-a;
-        a=Math.max(-70,Math.min(70,a));
-        dash={t:Math.tan(a*Math.PI/180)};
-        P.vy=SPEED*speedMult*dash.t; P.onGround=false; col='80,255,120';
-      } else {
-        let f;
-        if(mode==='ship') f = o.k==='r'?1.0 : o.k==='k'?-0.8 : 0.8;
-        else if(mode==='ball') f = o.k==='p'?0.7 : o.k==='r'?1.25 : o.k==='k'?-1.0 : 0.95;
-        else f = o.k==='p'?0.75 : o.k==='r'?1.32 : o.k==='k'?-1.1 : 1;
-        P.vy = -JUMPV*gdir*f*jm;
-        P.onGround=false;
-        col = o.k==='p' ? '255,123,213' : o.k==='r' ? '255,70,70' : o.k==='k' ? '40,40,40' : '255,225,77';
-      }
-      burst(P.x+PB/2, P.y+PB/2, col, 10);
-      orbSfx();
-      break;
-    }
-  }
   if(pressBuf>0) pressBuf--;
 
   if(curL.pads){
