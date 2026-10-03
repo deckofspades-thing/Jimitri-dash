@@ -130,7 +130,7 @@ const KINDS=['spikes','blocks','portals','speeds','orbs','pads','decos','slopes'
 const CH_BG=1000, CH_G=1001, CH_LINE=1002, CH_OBJ=1004;
 const CH_NAMES={1000:'BG',1001:'GROUND',1002:'LINE',1004:'OBJ'};
 const PORTAL_MODES=['cube','ship','ball','wave','gdown','gup','ufo','mini','big','robot'];
-const ORB_KINDS=['y','p','b','r','k','d','g'];
+const ORB_KINDS=['y','p','b','r','k','d','g','q'];
 const PAD_KINDS=['y','p','b'];
 const DECO_MAX=42, DECO_TEXT=100;
 const STYLE_NAMES=['CLASSIC','BRICK','TECH','LINES','PLATE','GRID','HATCH','STUDS','SOLID COLOR','GLASS',
@@ -1850,12 +1850,12 @@ function step(){
         const f = mode==='ship' ? 0.8 : mode==='ball' ? 0.95 : 1;
         P.vy = -JUMPV*gdir*f*jm; P.onGround=false; col='60,235,80';
       }
-      else if(o.k==='d'){
+      else if(o.k==='d' || o.k==='q'){
         let a=((o.rot||0)%360+540)%360-180;
         if(a>90) a=180-a; else if(a<-90) a=-180-a;
         a=Math.max(-70,Math.min(70,a));
-        dash={t:Math.tan(a*Math.PI/180)};
-        P.vy=SPEED*speedMult*dash.t; P.onGround=false; col='80,255,120';
+        dash={t:Math.tan(a*Math.PI/180), flip:o.k==='q'};
+        P.vy=SPEED*speedMult*dash.t; P.onGround=false; col=o.k==='q'?'255,90,200':'80,255,120';
       } else {
         let f;
         if(mode==='ship') f = o.k==='r'?1.0 : o.k==='k'?-0.8 : 0.8;
@@ -1870,7 +1870,7 @@ function step(){
       break;
     }
   }
-  if(dash && !held) dash=null;
+  if(dash && !held){ const fl=dash.flip; dash=null; if(fl) snapGravity(-gdir, false); }
   if(dash){
     P.vy = SPEED*speedMult*dash.t;
   } else if(orbHit){
@@ -2058,7 +2058,7 @@ function step(){
     if(mode==='ship'||mode==='wave') P.rot=Math.atan(dash.t);
     else P.rot+=0.32*gdir;
     if(ftick%2===0) particles.push({x:P.x, y:P.y+PB/2, vx:-(2+Math.random()*2), vy:(Math.random()-0.5),
-      g:0, life:16, max:16, size:PB*0.18, col:'80,255,120'});
+      g:0, life:16, max:16, size:PB*0.18, col:(dash.flip?'255,90,200':'80,255,120')
   } else if(mode==='ship'){
     const tgt = Math.atan2(P.vy, SPEED*speedMult*2.5);
     P.rot += (tgt - P.rot)*0.3;
