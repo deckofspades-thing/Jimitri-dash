@@ -1319,13 +1319,48 @@ function iconUfo(c,s,p,f,c1,c2){
   else { c.beginPath(); c.arc(0,s*0.24,s*0.1,0,Math.PI*2); c.fill(); }
 }
 function iconRobot(c,s,p,f,c1,c2){
-  c.fillStyle=c2; c.strokeStyle=ICON_DARK; c.lineWidth=3;
-  [-0.27,0.27].forEach(function(q){
-    iconRR(c,q*s-s*0.12,s*0.14,s*0.24,s*0.36,4); c.fill(); c.stroke();
-  });
-  c.save(); c.translate(0,-s*0.12); c.scale(0.8,0.8);
-  iconCube(c,s,p,f,c1,c2);
-  c.restore();
+  c.lineWidth=3; c.strokeStyle=ICON_DARK; c.lineJoin='round';
+  function box(x,y,w,h,col,r){
+    c.fillStyle=col; iconRR(c,x*s,y*s,w*s,h*s,r); c.fill(); c.stroke();
+  }
+  function poly(pts,col){
+    c.fillStyle=col; c.beginPath();
+    pts.forEach(function(q,i){ if(i) c.lineTo(q[0]*s,q[1]*s); else c.moveTo(q[0]*s,q[1]*s); });
+    c.closePath(); c.fill(); c.stroke();
+  }
+  // legs (back leg darker, front leg lighter)
+  box(-0.30,0.10,0.18,0.20,c2,3); box(-0.33,0.28,0.18,0.14,c2,3); box(-0.36,0.40,0.32,0.10,c2,3);
+  box(0.10,0.10,0.18,0.20,c1,3); box(0.14,0.28,0.18,0.14,c1,3); box(0.08,0.40,0.36,0.10,c1,3);
+  // torso, chest plate, arm
+  box(-0.30,-0.14,0.60,0.30,c1,4);
+  box(-0.18,-0.06,0.36,0.12,c2,2);
+  box(0.18,-0.10,0.26,0.12,c2,3);
+  // head shapes
+  const hy=-0.50, hh=0.38;
+  if(p===2){
+    c.beginPath(); c.moveTo(0,hy*s); c.lineTo(0,(hy-0.10)*s); c.stroke();
+    c.fillStyle=c2; c.beginPath(); c.arc(0,(hy-0.10)*s,0.045*s,0,Math.PI*2); c.fill(); c.stroke();
+  }
+  if(p===3){ box(-0.42,-0.40,0.10,0.18,c2,3); box(0.32,-0.40,0.10,0.18,c2,3); }
+  if(p===5){ poly([[-0.14,hy],[-0.08,hy-0.08],[0.08,hy-0.08],[0.14,hy]],c2); }
+  if(p===4) poly([[-0.34,hy+0.10],[-0.24,hy],[0.24,hy],[0.34,hy+0.10],[0.34,hy+hh],[-0.34,hy+hh]],c1);
+  else box(-0.34,hy,0.68,hh,c1,p===1?12:4);
+  // visor
+  c.fillStyle=ICON_DARK; iconRR(c,-0.27*s,-0.42*s,0.54*s,0.20*s,3); c.fill();
+  // eyes
+  c.fillStyle=c2;
+  if(f===0){ iconRR(c,0.02*s,-0.38*s,0.22*s,0.12*s,2); c.fill(); }
+  else if(f===1){
+    iconRR(c,-0.20*s,-0.38*s,0.14*s,0.12*s,2); c.fill();
+    iconRR(c,0.06*s,-0.38*s,0.14*s,0.12*s,2); c.fill();
+  } else if(f===2){
+    c.beginPath(); c.moveTo(-0.22*s,-0.40*s); c.lineTo(-0.04*s,-0.33*s); c.lineTo(-0.04*s,-0.26*s); c.lineTo(-0.22*s,-0.26*s); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(0.22*s,-0.40*s); c.lineTo(0.04*s,-0.33*s); c.lineTo(0.04*s,-0.26*s); c.lineTo(0.22*s,-0.26*s); c.closePath(); c.fill();
+  } else if(f===3){ iconRR(c,-0.22*s,-0.36*s,0.44*s,0.08*s,2); c.fill(); }
+  else {
+    c.beginPath(); c.arc(0.04*s,-0.32*s,0.08*s,0,Math.PI*2); c.fill();
+    c.fillStyle=ICON_DARK; c.beginPath(); c.arc(0.07*s,-0.32*s,0.035*s,0,Math.PI*2); c.fill();
+  }
 }
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
