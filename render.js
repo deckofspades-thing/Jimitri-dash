@@ -375,6 +375,21 @@ function drawBlock(b){
     ctx.fillStyle='rgb('+chStr(b.c||1)+')'; ctx.fillRect(x,y,w,h);
     return;
   }
+   if(t===T_BRICKBG){
+    ctx.save();
+    ctx.globalAlpha*=0.5;
+    ctx.fillStyle='rgba(5,8,20,0.9)'; ctx.fillRect(x,y,w,h);
+    ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+    ctx.lineWidth=1.5; ctx.strokeStyle='rgba('+oc+',0.30)';
+    const rh=B*0.5;
+    for(let yy=y+rh; yy<y+h-0.5; yy+=rh) line(x,yy,x+w,yy);
+    for(let yy=y, r=0; yy<y+h; yy+=rh, r++){
+      const off=(r&1)?B*0.5:0;
+      for(let xx=x+off; xx<x+w; xx+=B) line(xx,yy,xx,Math.min(yy+rh,y+h));
+    }
+    ctx.restore();
+    return;
+  }
   if(t===9){
     ctx.fillStyle='rgba('+oc+',0.10)'; ctx.fillRect(x,y,w,h);
     ctx.strokeStyle='rgba('+oc+',0.75)'; ctx.lineWidth=2;
@@ -1165,11 +1180,11 @@ function drawDecoLayer(decos, front){
 function drawLevelObjects(L, live){
   let i;
   drawDecoLayer(L.decos, false);
+  for(i=0;i<L.blocks.length;i++) if(L.blocks[i].t===T_BRICKBG) drawWrapped(L.blocks[i], drawBlock);
   for(i=0;i<L.slopes.length;i++) drawWrapped(L.slopes[i], drawSlope);
   for(i=0;i<L.speeds.length;i++) drawWrapped(L.speeds[i], drawSpeed);
   for(i=0;i<L.portals.length;i++) drawWrapped(L.portals[i], drawPortal);
-  for(i=0;i<L.blocks.length;i++) drawWrapped(L.blocks[i], drawBlock);
-  for(i=0;i<L.spikes.length;i++) drawWrapped(L.spikes[i], drawSpike);
+  for(i=0;i<L.blocks.length;i++) if(L.blocks[i].t!==T_BRICKBG) drawWrapped(L.blocks[i], drawBlock);  for(i=0;i<L.spikes.length;i++) drawWrapped(L.spikes[i], drawSpike);
   for(i=0;i<L.saws.length;i++) drawWrapped(L.saws[i], drawSaw);
   for(i=0;i<L.pads.length;i++) drawWrapped(L.pads[i], drawPad);
   for(i=0;i<L.orbs.length;i++) drawWrapped(L.orbs[i], drawOrb, live?orbUsed[i]:false);
