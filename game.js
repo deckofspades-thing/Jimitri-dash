@@ -36,7 +36,7 @@ function saveIcons(){
 // ---------- world + camera ----------
 const B=60, groundY=900, CEIL_BLOCKS=9, MINI_S=0.6;
 const SPEED=0.158*B, GRAV=0.0205*B, JUMPV=0.31*B, ROTS=Math.PI/(2*JUMPV/GRAV);
-const ROBOT_V=0.19*B, ROBOT_FR=10;
+const ROBOT_V=0.192*B, ROBOT_FR=14;
 let SW=0, SH=0, W=0, H=0, dpr=1, Z=1, VT=0, cullPad=0;
 function ceilingY(){ return groundY - CEIL_BLOCKS*B; }
 function resize(){
