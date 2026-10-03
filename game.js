@@ -133,8 +133,9 @@ const ORB_KINDS=['y','p','b','r','k','d','g'];
 const PAD_KINDS=['y','p','b'];
 const DECO_MAX=42, DECO_TEXT=100;
 const STYLE_NAMES=['CLASSIC','BRICK','TECH','LINES','PLATE','GRID','HATCH','STUDS','SOLID COLOR','GLASS',
-  'OUTLINE PIECE','OUTLINE ONLY','D BLOCK','CHECKER','DIAMOND','CROSS','CIRCUIT','WAVY','TILES','GLOW','HAZARD','BEVEL','SCALES','ZIGZAG'];
+  'OUTLINE PIECE','OUTLINE ONLY','D BLOCK','CHECKER','DIAMOND','CROSS','CIRCUIT','WAVY','TILES','GLOW','HAZARD','BEVEL','SCALES','ZIGZAG','BRICK BACKGROUND'];
 const T_OUTLINE=10, T_LINES=11, T_D=12;
+const T_BRICKBG=24;
 const BG_NAMES=['CITY','SPACE','SYNTHWAVE','MOUNTAINS','OCEAN','HEX','CLOUDS','CIRCUIT','SQUARES','PLAIN'];
 const GR_NAMES=['CLASSIC','TILES','STRIPES','BRICKS','PLAIN'];
 const MODE_NAMES=['cube','ship','ball','ufo','wave'];
@@ -678,8 +679,7 @@ function prepLevel(d, diff){
   L.blocks.forEach(prepBlock);
   const dbl=L.blocks.filter(function(b){ return b.t===T_D; });
   L.blocks.forEach(function(b){
-    b._nc=(b.t===T_D); b._d=false;
-    if(b._nc) return;
+    b._nc=(b.t===T_D || b.t===T_BRICKBG); b._d=false;
     const cx=b.gx+b._cx, cy=(b.gy||0)+b._cy;
     for(let i=0;i<dbl.length;i++){
       const d=dbl[i], dx=d.gx+d._cx, dy=(d.gy||0)+d._cy;
