@@ -1010,19 +1010,32 @@ function drawPortal(p){
   }
   ctx.restore();
 }
-const ORB_COL={y:'255,225,77', p:'255,123,213', b:'70,150,255', r:'255,70,70', k:'30,30,34', d:'70,255,110', g:'40,215,70'};
+const ORB_COL={y:'255,225,77', p:'255,123,213', b:'70,150,255', r:'255,70,70', k:'30,30,34', d:'70,255,110', g:'40,215,70', q:'255,70,190'};
 function drawOrb(o, used){
   const x=(egx(o)+0.5)*B-camX, y=groundY-(egy(o)+0.5)*B;
   if(x<-60-cullPad || x>W+60+cullPad) return;
-  const c = ORB_COL[o.k]||ORB_COL.y;
+  const c = ORB_COL[o.k]||ORB_COL.y, dsh=(o.k==='d'||o.k==='q');
   const pul = 1+0.1*Math.sin(ftick*0.15+o.gx);
   const r = B*0.42*pul, al = used?0.25:1;
   ctx.fillStyle='rgba('+(o.k==='k'?'255,255,255':c)+','+(0.16*al)+')';
   ctx.beginPath(); ctx.arc(x,y,r*1.7,0,Math.PI*2); ctx.fill();
-  if(o.k==='d'){
+  if(dsh){
     ctx.strokeStyle='rgba('+c+','+(0.9*al)+')'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.arc(x,y,r*1.35,0,Math.PI*2); ctx.stroke();
   }
+  ctx.fillStyle='rgba('+c+','+(0.9*al)+')';
+  ctx.strokeStyle='rgba(255,255,255,'+(0.9*al)+')'; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  if(dsh){
+    ctx.save(); ctx.translate(x,y);
+    ctx.strokeStyle='rgba(255,255,255,'+al+')'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.beginPath(); ctx.moveTo(-r*0.5,0); ctx.lineTo(r*0.55,0); ctx.moveTo(r*0.2,-r*0.35); ctx.lineTo(r*0.55,0); ctx.lineTo(r*0.2,r*0.35); ctx.stroke();
+    ctx.restore();
+  } else {
+    ctx.fillStyle='rgba(255,255,255,'+(0.7*al)+')';
+    ctx.beginPath(); ctx.arc(x-r*0.25,y-r*0.3,r*0.28,0,Math.PI*2); ctx.fill();
+  }
+}
   ctx.fillStyle='rgba('+c+','+(0.9*al)+')';
   ctx.strokeStyle='rgba(255,255,255,'+(0.9*al)+')'; ctx.lineWidth=2.5;
   ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
