@@ -97,7 +97,7 @@ addItem(4,'padp','PINK PAD','pads',{k:'p'});
 addItem(4,'padb','BLUE PAD - flips gravity','pads',{k:'b'});
 addItem(4,'padyc','YELLOW PAD (ceiling)','pads',{k:'y',r:1});
 [['pcube','cube','CUBE PORTAL'],['pship','ship','SHIP PORTAL'],['pball','ball','BALL PORTAL'],['pufo','ufo','UFO PORTAL'],
- ['pwave','wave','WAVE PORTAL'],['pgdown','gdown','GRAVITY DOWN'],['pgup','gup','GRAVITY UP'],
+ ['pwave','wave','WAVE PORTAL'],['probot','robot','ROBOT PORTAL'],['pgdown','gdown','GRAVITY DOWN'],['pgup','gup','GRAVITY UP'],
  ['pmini','mini','MINI PORTAL - shrinks you + your hitbox'],['pbig','big','NORMAL SIZE PORTAL']].forEach(function(p){
   addItem(5,p[0],p[2],'portals',{m:p[1]});
 });
