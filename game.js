@@ -1890,7 +1890,7 @@ function step(){
     if(P.vy >  mv) P.vy =  mv;
     if(P.vy < -mv) P.vy = -mv;
    } else if(mode==='robot'){
-    if(P.onGround && held){ P.vy = -ROBOT_V*jm*gdir; P.onGround=false; robotBoost=ROBOT_FR; }
+    if(P.onGround && pressBuf>0){ P.vy = -ROBOT_V*jm*gdir; P.onGround=false; robotBoost=ROBOT_FR; pressBuf=0; }
     if(robotBoost>0 && held && P.vy*gdir<0){ P.vy = -ROBOT_V*jm*gdir; robotBoost--; }
     else {
       robotBoost=0;
