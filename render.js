@@ -980,6 +980,7 @@ function drawPortal(p){
             : p.m==='gdown' ? '70,150,255'
             : p.m==='gup' ? '255,225,77'
             : p.m==='ufo' ? '255,150,40'
+            : p.m==='robot' ? '235,235,245'
             : p.m==='mini' ? '255,110,210'
             : p.m==='big' ? '60,255,170'
             : '102,255,102';
@@ -1317,6 +1318,15 @@ function iconUfo(c,s,p,f,c1,c2){
   else if(f===3){ c.strokeStyle=c2; c.lineWidth=2.5; c.beginPath(); c.ellipse(0,s*0.21,s*0.42,s*0.1,0,0,Math.PI*2); c.stroke(); }
   else { c.beginPath(); c.arc(0,s*0.24,s*0.1,0,Math.PI*2); c.fill(); }
 }
+function iconRobot(c,s,p,f,c1,c2){
+  c.fillStyle=c2; c.strokeStyle=ICON_DARK; c.lineWidth=3;
+  [-0.27,0.27].forEach(function(q){
+    iconRR(c,q*s-s*0.12,s*0.14,s*0.24,s*0.36,4); c.fill(); c.stroke();
+  });
+  c.save(); c.translate(0,-s*0.12); c.scale(0.8,0.8);
+  iconCube(c,s,p,f,c1,c2);
+  c.restore();
+}
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
   c1=c1||ICON_COLS[selectedIcons.c1]; c2=c2||ICON_COLS[selectedIcons.c2];
@@ -1326,6 +1336,7 @@ function drawIconShape(c, iconType, idx, s, c1, c2){
   else if(iconType==='wave') iconWave(c,s,p,f,c1,c2);
   else if(iconType==='ball') iconBall(c,s,p,f,c1,c2);
   else if(iconType==='ufo') iconUfo(c,s,p,f,c1,c2);
+  else if(iconType==='robot') iconRobot(c,s,p,f,c1,c2);
   else iconCube(c,s,p,f,c1,c2);
   c.restore();
 }
