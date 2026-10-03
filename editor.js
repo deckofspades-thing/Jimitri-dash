@@ -46,6 +46,8 @@ addItem(0,'solslabt','SOLID HALF SLAB (top)','blocks',{gy:0.5,w:1,h:0.5,t:8});
 addItem(0,'solsmall','SOLID SMALL','blocks',{gx:0.25,w:0.5,h:0.5,t:8});
 addItem(0,'glass','GLASS BLOCK (solid, see-through)','blocks',{w:1,h:1,t:9});
 addItem(0,'glassslab','GLASS HALF SLAB','blocks',{w:1,h:0.5,t:9});
+addItem(0,'brickbg','BRICK BACKGROUND BLOCK - no outline, no hitbox, semi-transparent','blocks',{w:1,h:1,t:T_BRICKBG});
+addItem(0,'brickbgslab','BRICK BACKGROUND HALF SLAB','blocks',{w:1,h:0.5,t:T_BRICKBG});
 [[15,'FULL'],[1,'TOP EDGE'],[9,'TOP-LEFT CORNER'],[3,'TOP-RIGHT CORNER'],[8,'LEFT EDGE'],[2,'RIGHT EDGE'],[5,'TOP + BOTTOM'],[10,'LEFT + RIGHT'],[0,'NO EDGES (inside)']].forEach(function(q){
   addItem(0,'ol'+q[0],'OUTLINE PIECE - '+q[1],'blocks',{w:1,h:1,t:T_OUTLINE,e:q[0]});
 });
@@ -389,8 +391,7 @@ function playHere(){
   for(let n=0;n<60;n++){
     let up=null;
     ED.blocks.forEach(function(b){
-      if(b.t===T_D || b.t===T_LINES || b.rot) return;
-      const bw=b.w*(b.sc||1), bh=b.h*(b.sc||1), by=b.gy||0;
+      if(b.t===T_D || b.t===T_LINES || b.t===T_BRICKBG || b.rot) return;      const bw=b.w*(b.sc||1), bh=b.h*(b.sc||1), by=b.gy||0;
       if(b.gx<=cxm && b.gx+bw>=cxm && by<=gy+0.01 && by+bh>gy+0.01) up=Math.max(up||0, by+bh);
     });
     if(up===null) break;
