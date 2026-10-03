@@ -686,6 +686,13 @@ function prepLevel(d, diff){
       if(Math.abs(cx-dx)<b._hw+d._hw-0.01 && Math.abs(cy-dy)<b._hh+d._hh-0.01){ b._d=true; break; }
     }
   });
+  L.slopes.forEach(function(sl){
+    const sc=sl.sc||1, hw=(sl.w||1)*sc/2, hh=(sl.h||1)*sc/2, cx=sl.gx+(sl.w||1)/2, cy=(sl.gy||0)+(sl.h||1)/2;
+    sl._d=dbl.some(function(d){
+      const dx=d.gx+d._cx, dy=(d.gy||0)+d._cy;
+      return Math.abs(cx-dx)<hw+d._hw-0.01 && Math.abs(cy-dy)<hh+d._hh-0.01;
+    });
+  });
   L.portals.forEach(function(p){ p._horiz=Math.abs(Math.sin(((p.r||0)*90+(p.rot||0))*Math.PI/180))>0.7; });
   L.pads.forEach(function(p){ p._ceil=((p.r|0)===1)!==(Math.cos(rotRad(p))<-0.5); });
   L.endX=maxGx(d)+10;
@@ -1933,14 +1940,14 @@ function step(){
         if(foot < surf-2) continue;
         if(foot > baseBot + B*0.5) continue;
         if(tallLeft && entered && (foot-surf) > B*0.4){ die(); updateParticles(); return; }
-        if(mode==='wave' && foot<surf) continue;
+        if(mode==='wave'){ if(!s._d && !dash){ die(); updateParticles(); return; } if(foot<surf) continue; }
         onSlope=true; if(surf<floorSurf) floorSurf=surf;
       } else {
         const head=P.y+hbi;
         if(head > surf+2) continue;
         if(head < baseTop - B*0.5) continue;
         if(tallLeft && entered && (surf-head) > B*0.4){ die(); updateParticles(); return; }
-        if(mode==='wave' && head>surf) continue;
+        if(mode==='wave'){ if(!s._d && !dash){ die(); updateParticles(); return; } if(head>surf) continue; }
         onSlope=true; if(surf<ceilSurf) ceilSurf=surf;
       }
     }
