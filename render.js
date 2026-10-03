@@ -1318,7 +1318,11 @@ function iconUfo(c,s,p,f,c1,c2){
   else if(f===3){ c.strokeStyle=c2; c.lineWidth=2.5; c.beginPath(); c.ellipse(0,s*0.21,s*0.42,s*0.1,0,0,Math.PI*2); c.stroke(); }
   else { c.beginPath(); c.arc(0,s*0.24,s*0.1,0,Math.PI*2); c.fill(); }
 }
+let robotPose=null;
 function iconRobot(c,s,p,f,c1,c2){
+  const A=robotPose;
+  let ph=0, air=false, rise=false, boost=false;
+  if(A){ ph=A.x*0.087; air=A.air; rise=A.vy<0; boost=A.boost; }
   c.lineWidth=3; c.strokeStyle=ICON_DARK; c.lineJoin='round';
   function box(x,y,w,h,col,r){
     c.fillStyle=col; iconRR(c,x*s,y*s,w*s,h*s,r); c.fill(); c.stroke();
@@ -1328,14 +1332,43 @@ function iconRobot(c,s,p,f,c1,c2){
     pts.forEach(function(q,i){ if(i) c.lineTo(q[0]*s,q[1]*s); else c.moveTo(q[0]*s,q[1]*s); });
     c.closePath(); c.fill(); c.stroke();
   }
-  // legs (back leg darker, front leg lighter)
-  box(-0.30,0.10,0.18,0.20,c2,3); box(-0.33,0.28,0.18,0.14,c2,3); box(-0.36,0.40,0.32,0.10,c2,3);
-  box(0.10,0.10,0.18,0.20,c1,3); box(0.14,0.28,0.18,0.14,c1,3); box(0.08,0.40,0.36,0.10,c1,3);
-  // torso, chest plate, arm
+  function leg(hx,col,t,k){
+    c.save(); c.translate(hx*s,0.12*s); c.rotate(t);
+    box(-0.09,0,0.18,0.18,col,3);
+    c.translate(0,0.15*s); c.rotate(k);
+    box(-0.09,0,0.18,0.16,col,3);
+    c.translate(0,0.13*s);
+    box(-0.10,0,0.34,0.09,col,3);
+    c.restore();
+  }
+  let ft=0, fk=0, bt=0, bk=0, arm=0, bob=0;
+  if(A){
+    if(!air){
+      ft=Math.sin(ph)*0.6; fk=Math.max(0,Math.sin(ph+1.3))*0.9;
+      bt=Math.sin(ph+Math.PI)*0.6; bk=Math.max(0,Math.sin(ph+1.3+Math.PI))*0.9;
+      arm=-Math.sin(ph)*0.3; bob=-Math.abs(Math.sin(ph))*0.03;
+    } else if(boost){ ft=-0.05; bt=0.05; arm=-0.9; }
+    else if(rise){ ft=-0.5; fk=0.9; bt=0.4; bk=0.7; arm=-0.7; }
+    else { ft=-0.25; fk=0.3; bt=0.25; bk=0.2; arm=-0.3; }
+  }
+  // legs
+  leg(-0.21,c2,bt,bk);
+  leg(0.19,c1,ft,fk);
+  if(A && air && boost){
+    const fl=0.12+0.05*Math.sin(A.x*0.6);
+    c.fillStyle='#ffb340';
+    [-0.12,0.26].forEach(function(fx){
+      c.beginPath(); c.moveTo((fx-0.08)*s,0.5*s); c.lineTo((fx+0.08)*s,0.5*s); c.lineTo(fx*s,(0.5+fl)*s); c.closePath(); c.fill();
+    });
+  }
+  // body
+  c.save(); c.translate(0,bob*s);
   box(-0.30,-0.14,0.60,0.30,c1,4);
   box(-0.18,-0.06,0.36,0.12,c2,2);
-  box(0.18,-0.10,0.26,0.12,c2,3);
-  // head shapes
+  c.save(); c.translate(0.18*s,-0.04*s); c.rotate(arm);
+  box(0,-0.06,0.26,0.12,c2,3);
+  c.restore();
+  // head
   const hy=-0.50, hh=0.38;
   if(p===2){
     c.beginPath(); c.moveTo(0,hy*s); c.lineTo(0,(hy-0.10)*s); c.stroke();
@@ -1345,9 +1378,7 @@ function iconRobot(c,s,p,f,c1,c2){
   if(p===5){ poly([[-0.14,hy],[-0.08,hy-0.08],[0.08,hy-0.08],[0.14,hy]],c2); }
   if(p===4) poly([[-0.34,hy+0.10],[-0.24,hy],[0.24,hy],[0.34,hy+0.10],[0.34,hy+hh],[-0.34,hy+hh]],c1);
   else box(-0.34,hy,0.68,hh,c1,p===1?12:4);
-  // visor
   c.fillStyle=ICON_DARK; iconRR(c,-0.27*s,-0.42*s,0.54*s,0.20*s,3); c.fill();
-  // eyes
   c.fillStyle=c2;
   if(f===0){ iconRR(c,0.02*s,-0.38*s,0.22*s,0.12*s,2); c.fill(); }
   else if(f===1){
@@ -1361,6 +1392,7 @@ function iconRobot(c,s,p,f,c1,c2){
     c.beginPath(); c.arc(0.04*s,-0.32*s,0.08*s,0,Math.PI*2); c.fill();
     c.fillStyle=ICON_DARK; c.beginPath(); c.arc(0.07*s,-0.32*s,0.035*s,0,Math.PI*2); c.fill();
   }
+  c.restore();
 }
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
@@ -1390,7 +1422,9 @@ function drawPlayer(){
   ctx.translate(P.x-camX+PB/2, P.y+PB/2);
   ctx.rotate(P.rot);
   ctx.scale(PB/B, gdir*PB/B);
+  if(mode==='robot') robotPose={x:P.x, air:!P.onGround, vy:P.vy*gdir, boost:robotBoost>0};
   drawFullIcon(ctx, mode, selectedIcons[mode]||0, B-4);
+  robotPose=null;
   ctx.restore();
 }
 function drawWaveTrail(){
