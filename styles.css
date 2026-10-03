@@ -246,3 +246,30 @@ html,body{margin:0;height:100%;overflow:hidden;background:#000;
     .cbtn{width:44px;height:44px;padding:7px;}
     .edtm{display:none;}
   }
+
+  .mbtn.setc{background:linear-gradient(180deg,#8fa3c8,#4a5a7c);}
+  #setscr{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;}
+  #setbox{width:min(620px,94vw);}
+  .krow{display:flex;align-items:center;gap:6px;font-weight:900;font-size:12px;}
+  .krow span{flex:1;}
+  .kbtn{min-width:96px;background:#1c140c;border:2px solid #8a6a3a;border-radius:7px;color:#fff;font-weight:900;
+    font-size:11px;padding:6px 4px;cursor:pointer;font-family:Arial,sans-serif;}
+  .kbtn:hover{border-color:#ffd27a;}
+  .kbtn.cap{background:#7a4a10;border-color:#ffe14d;animation:blink 1s steps(2) infinite;}
+  .kclr{width:26px;height:26px;border-radius:50%;border:2px solid #300;background:linear-gradient(#ff6b6b,#b32d2d);
+    color:#fff;font-weight:900;font-size:10px;cursor:pointer;}
+  .frow input[type=range]{width:46%;accent-color:#7ae82f;}
+  #iconprev{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;background:rgba(0,0,0,.35);
+    border-radius:12px;padding:6px 10px;}
+  #iconprev canvas{width:56px;height:56px;}
+  #icongrid{grid-template-columns:repeat(6,minmax(54px,76px));}
+  #icongrid.colgrid{grid-template-columns:repeat(10,34px);gap:6px;}
+  .glabel{grid-column:1/-1;font-family:'Press Start 2P',monospace;font-size:11px;margin-top:6px;text-shadow:0 2px 0 #000;}
+  .swatch{width:34px;height:34px;border-radius:8px;border:3px solid rgba(0,0,0,.6);cursor:pointer;}
+  .swatch.on{border-color:#fff;box-shadow:0 0 0 3px #ffe14d;}
+  .glowbtn{grid-column:1/-1;justify-self:center;margin-top:8px;}
+  #edcoord{position:absolute;top:54px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;white-space:nowrap;
+    text-shadow:-2px 0 #000,2px 0 #000,0 -2px #000,0 2px #000;}
+  .pfrow{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border-radius:8px;padding:5px 8px;font-weight:900;font-size:12px;}
+  .pfrow span{flex:1;}
+  @media (max-width:440px){#icongrid{grid-template-columns:repeat(5,54px)}#icongrid.colgrid{grid-template-columns:repeat(8,30px)}.swatch{width:30px;height:30px}}

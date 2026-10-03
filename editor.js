@@ -14,13 +14,13 @@ function saveEdo(){ try{ localStorage.setItem('jd_edopts', JSON.stringify(EDO));
 let clip=(function(){ try{ return JSON.parse(localStorage.getItem('jd_clip')||'null'); }catch(e){ return null; } })();
 
 // ---------- palette ----------
-const BLOCK_NAMES=['CLASSIC','BRICK','TECH','LINES','PLATE','GRID','HATCH','STUDS'];
 const DECO_NAMES=['DECO SPIKE','CHAIN','PULSE RING','CRYSTALS','ARROW','OUTLINE','CIRCLE','STAR','PIPE','DOTS','WAVE LINE','DIAMOND',
-  'CLOUD','BOLT','HEART','PLUS','TRIANGLE','HEXAGON','GEAR','PILLAR','CHEVRONS','SQUARE','DOME','GRASS','LIGHT BEAM','SPARKLE','GLOW','TORCH'];
+  'CLOUD','BOLT','HEART','PLUS','TRIANGLE','HEXAGON','GEAR','PILLAR','CHEVRONS','SQUARE','DOME','GRASS','LIGHT BEAM','SPARKLE','GLOW','TORCH',
+  'FIRE','FIRE ROW','EMBERS','BRAZIER','FLAME PILLAR','BLUE FIRE','FIREBALL',
+  'GLOW EDGE','GLOW CORNER','BIG GLOW','GLOW RING','GLOW SQUARE','GLOW LINE','GLOW DOME','GLOW SPIKE'];
 function mk(k, base){ return function(gx,gy){ const o=Object.assign({}, base); o.gx=gx+(base.gx||0); o.gy=gy+(base.gy||0); o._k=k; return o; }; }
 const CATS=[
   {name:'BLOCKS', items:[]},
-  {name:'SOLID', items:[]},
   {name:'SLOPES', items:[]},
   {name:'SPIKES', items:[]},
   {name:'SAWS', items:[]},
@@ -28,67 +28,126 @@ const CATS=[
   {name:'PORTALS', items:[]},
   {name:'SPEED', items:[]},
   {name:'DECO', items:[]},
-  {name:'DECO 2', items:[]},
   {name:'TRIGGERS', items:[]},
-  {name:'SPECIAL', items:[]}
+  {name:'SPECIAL', items:[]},
+  {name:'PREFABS', items:[]}
 ];
+const CAT_PREFAB=10;
 function addItem(ci, id, name, k, base){ CATS[ci].items.push({id:id, name:name, k:k, make:mk(k,base)}); }
-BLOCK_NAMES.forEach(function(n,t){ addItem(0,'b'+t,n+' BLOCK','blocks',{w:1,h:1,t:t}); });
+[0,1,2,3,4,5,6,7,13,14,15,16,17,18,19,20,21,22,23].forEach(function(t){ addItem(0,'b'+t,STYLE_NAMES[t]+' BLOCK','blocks',{w:1,h:1,t:t}); });
 addItem(0,'bslab','HALF SLAB (bottom)','blocks',{w:1,h:0.5,t:0});
 addItem(0,'bslabt','HALF SLAB (top)','blocks',{gy:0.5,w:1,h:0.5,t:0});
 addItem(0,'bsmall','SMALL BLOCK','blocks',{gx:0.25,w:0.5,h:0.5,t:0});
 addItem(0,'bthin','THIN PILLAR','blocks',{gx:0.375,w:0.25,h:1,t:0});
 addItem(0,'bwide','2x2 BLOCK','blocks',{w:2,h:2,t:0});
-addItem(1,'sol','SOLID COLOR BLOCK (color channel 1 by default)','blocks',{w:1,h:1,t:8});
-addItem(1,'solslab','SOLID HALF SLAB','blocks',{w:1,h:0.5,t:8});
-addItem(1,'solslabt','SOLID HALF SLAB (top)','blocks',{gy:0.5,w:1,h:0.5,t:8});
-addItem(1,'solsmall','SOLID SMALL','blocks',{gx:0.25,w:0.5,h:0.5,t:8});
-addItem(1,'glass','GLASS BLOCK (solid, see-through)','blocks',{w:1,h:1,t:9});
-addItem(1,'glassslab','GLASS HALF SLAB','blocks',{w:1,h:0.5,t:9});
+addItem(0,'sol','SOLID COLOR BLOCK (color channel 1 by default)','blocks',{w:1,h:1,t:8});
+addItem(0,'solslab','SOLID HALF SLAB','blocks',{w:1,h:0.5,t:8});
+addItem(0,'solslabt','SOLID HALF SLAB (top)','blocks',{gy:0.5,w:1,h:0.5,t:8});
+addItem(0,'solsmall','SOLID SMALL','blocks',{gx:0.25,w:0.5,h:0.5,t:8});
+addItem(0,'glass','GLASS BLOCK (solid, see-through)','blocks',{w:1,h:1,t:9});
+addItem(0,'glassslab','GLASS HALF SLAB','blocks',{w:1,h:0.5,t:9});
+[[15,'FULL'],[1,'TOP EDGE'],[9,'TOP-LEFT CORNER'],[3,'TOP-RIGHT CORNER'],[8,'LEFT EDGE'],[2,'RIGHT EDGE'],[5,'TOP + BOTTOM'],[10,'LEFT + RIGHT'],[0,'NO EDGES (inside)']].forEach(function(q){
+  addItem(0,'ol'+q[0],'OUTLINE PIECE - '+q[1],'blocks',{w:1,h:1,t:T_OUTLINE,e:q[0]});
+});
+[[15,'FULL'],[1,'TOP'],[9,'CORNER']].forEach(function(q){
+  addItem(0,'oll'+q[0],'OUTLINE ONLY - '+q[1]+' (see-through)','blocks',{w:1,h:1,t:T_LINES,e:q[0]});
+});
+addItem(0,'invb','INVISIBLE BLOCK - fades out as you get close','blocks',{w:1,h:1,t:0,inv:1});
+addItem(0,'dblock','D BLOCK - put it over blocks so the wave can slide on them (not shown in game)','blocks',{w:1,h:1,t:T_D});
 ['FLOOR RAMP /','FLOOR RAMP \\ (tall side kills)','CEILING RAMP','CEILING RAMP (tall side kills)'].forEach(function(n,o){
-  addItem(2,'sl'+o,n,'slopes',{o:o});
+  addItem(1,'sl'+o,n,'slopes',{o:o});
+});
+['LONG FLOOR RAMP / (2x1)','LONG FLOOR RAMP \\ (2x1)','LONG CEILING RAMP (2x1)','LONG CEILING RAMP 2 (2x1)'].forEach(function(n,o){
+  addItem(1,'sll'+o,n,'slopes',{o:o,w:2});
 });
 ['BIG FLOOR RAMP /','BIG FLOOR RAMP \\','BIG CEILING RAMP','BIG CEILING RAMP 2'].forEach(function(n,o){
-  addItem(2,'slb'+o,n,'slopes',{gx:0.5,gy:0.5,o:o,sc:2});
+  addItem(1,'slb'+o,n,'slopes',{gx:0.5,gy:0.5,o:o,sc:2});
 });
-addItem(3,'spike','SPIKE','spikes',{r:0,sz:0});
-addItem(3,'shalf','HALF SPIKE','spikes',{r:0,sz:1});
-addItem(3,'smini','MINI SPIKE','spikes',{r:0,sz:2});
-addItem(3,'stiny','TINY SPIKE','spikes',{r:0,sz:3});
-addItem(3,'spiked','CEILING SPIKE','spikes',{r:1,sz:0});
-addItem(3,'spiker','SIDE SPIKE (right)','spikes',{r:2,sz:0});
-addItem(3,'spikel','SIDE SPIKE (left)','spikes',{r:3,sz:0});
-addItem(3,'shalfd','CEILING HALF SPIKE','spikes',{r:1,sz:1});
+addItem(2,'spike','SPIKE','spikes',{r:0,sz:0});
+addItem(2,'shalf','HALF SPIKE','spikes',{r:0,sz:1});
+addItem(2,'smini','MINI SPIKE','spikes',{r:0,sz:2});
+addItem(2,'stiny','TINY SPIKE','spikes',{r:0,sz:3});
+addItem(2,'spiked','CEILING SPIKE','spikes',{r:1,sz:0});
+addItem(2,'spiker','SIDE SPIKE (right)','spikes',{r:2,sz:0});
+addItem(2,'spikel','SIDE SPIKE (left)','spikes',{r:3,sz:0});
+addItem(2,'shalfd','CEILING HALF SPIKE','spikes',{r:1,sz:1});
+addItem(2,'sinv','INVISIBLE SPIKE - fades out as you get close (Clubstep style)','spikes',{r:0,sz:0,inv:1});
+addItem(2,'sinvh','INVISIBLE HALF SPIKE','spikes',{r:0,sz:1,inv:1});
+addItem(2,'sinvd','INVISIBLE CEILING SPIKE','spikes',{r:1,sz:0,inv:1});
 [['saw',0,[0,1,2]],['gear',1,[0,1,2]],['shur',2,[0,1]]].forEach(function(g){
   g[2].forEach(function(sz){
-    addItem(4,g[0]+sz,['SAWBLADE','GEAR SAW','SHURIKEN'][g[1]]+' '+['BIG','MEDIUM','SMALL'][sz],'saws',{k:g[1],sz:sz});
+    addItem(3,g[0]+sz,['SAWBLADE','GEAR SAW','SHURIKEN'][g[1]]+' '+['BIG','MEDIUM','SMALL'][sz],'saws',{k:g[1],sz:sz});
   });
 });
-addItem(5,'orby','YELLOW ORB - tap for a full jump','orbs',{k:'y'});
-addItem(5,'orbp','PINK ORB - small jump','orbs',{k:'p'});
-addItem(5,'orbr','RED ORB - huge jump','orbs',{k:'r'});
-addItem(5,'orbb','BLUE ORB - flips gravity','orbs',{k:'b'});
-addItem(5,'orbk','BLACK ORB - slams you down','orbs',{k:'k'});
-addItem(5,'orbd','DASH ORB - hold to dash in its arrow direction (rotate it to aim)','orbs',{k:'d'});
-addItem(5,'pady','YELLOW PAD','pads',{k:'y'});
-addItem(5,'padp','PINK PAD','pads',{k:'p'});
-addItem(5,'padb','BLUE PAD - flips gravity','pads',{k:'b'});
-addItem(5,'padyc','YELLOW PAD (ceiling)','pads',{k:'y',r:1});
+addItem(3,'sawinv','INVISIBLE SAWBLADE','saws',{k:0,sz:1,inv:1});
+addItem(4,'orby','YELLOW ORB - tap for a full jump','orbs',{k:'y'});
+addItem(4,'orbp','PINK ORB - small jump','orbs',{k:'p'});
+addItem(4,'orbr','RED ORB - huge jump','orbs',{k:'r'});
+addItem(4,'orbb','BLUE ORB - flips gravity','orbs',{k:'b'});
+addItem(4,'orbg','GREEN ORB - flips gravity AND jumps','orbs',{k:'g'});
+addItem(4,'orbk','BLACK ORB - slams you down','orbs',{k:'k'});
+addItem(4,'orbd','DASH ORB - hold to dash in its arrow direction (rotate it to aim)','orbs',{k:'d'});
+addItem(4,'pady','YELLOW PAD','pads',{k:'y'});
+addItem(4,'padp','PINK PAD','pads',{k:'p'});
+addItem(4,'padb','BLUE PAD - flips gravity','pads',{k:'b'});
+addItem(4,'padyc','YELLOW PAD (ceiling)','pads',{k:'y',r:1});
 [['pcube','cube','CUBE PORTAL'],['pship','ship','SHIP PORTAL'],['pball','ball','BALL PORTAL'],['pufo','ufo','UFO PORTAL'],
  ['pwave','wave','WAVE PORTAL'],['pgdown','gdown','GRAVITY DOWN'],['pgup','gup','GRAVITY UP'],
  ['pmini','mini','MINI PORTAL - shrinks you + your hitbox'],['pbig','big','NORMAL SIZE PORTAL']].forEach(function(p){
-  addItem(6,p[0],p[2],'portals',{m:p[1]});
+  addItem(5,p[0],p[2],'portals',{m:p[1]});
 });
-['0.5x','1x','2x','3x','4x'].forEach(function(n,t){ addItem(7,'s'+t,n+' SPEED','speeds',{t:t}); });
-for(let k=0;k<=11;k++) addItem(8,'d'+k,DECO_NAMES[k],'decos',{k:k,z:3});
-for(let k=12;k<=DECO_MAX;k++) addItem(9,'d'+k,DECO_NAMES[k],'decos',{k:k,z:3});
-addItem(9,'dtext','TEXT - edit it with EDIT SPECIAL','decos',{k:DECO_TEXT,tx:'TEXT',z:6});
-addItem(10,'tmove','MOVE TRIGGER - slides a group','triggers',{type:'move',g:1,dx:4,dy:0,dur:0.5,ease:1});
-addItem(10,'tcolor','COLOR TRIGGER - fades a color channel','triggers',{type:'color',ch:CH_BG,col:[200,40,120],dur:0.6});
-addItem(10,'talpha','ALPHA TRIGGER - fades a group in/out','triggers',{type:'alpha',g:1,a:0,dur:0.5});
-addItem(11,'start','START POSITION - playtest spawns here ([ and ] switch)','starts',{});
+['0.5x','1x','2x','3x','4x'].forEach(function(n,t){ addItem(6,'s'+t,n+' SPEED','speeds',{t:t}); });
+for(let k=0;k<=DECO_MAX;k++) addItem(7,'d'+k,DECO_NAMES[k],'decos',{k:k,z:3});
+addItem(7,'dtext','TEXT - edit it with EDIT SPECIAL','decos',{k:DECO_TEXT,tx:'TEXT',z:6});
+addItem(8,'tmove','MOVE TRIGGER - slides a group','triggers',{type:'move',g:1,dx:4,dy:0,dur:0.5,ease:1});
+addItem(8,'tcolor','COLOR TRIGGER - fades a color channel','triggers',{type:'color',ch:CH_BG,col:[200,40,120],dur:0.6});
+addItem(8,'talpha','ALPHA TRIGGER - fades a group in/out','triggers',{type:'alpha',g:1,a:0,dur:0.5});
+addItem(8,'tspawn','SPAWN TRIGGER - fires every trigger that has its own group set to the target','triggers',{type:'spawn',g:1,dl:0});
+addItem(8,'ttogoff','TOGGLE TRIGGER (OFF) - hides a group and turns off its hitboxes','triggers',{type:'toggle',g:1,on:0});
+addItem(8,'ttogon','TOGGLE TRIGGER (ON) - turns a group back on','triggers',{type:'toggle',g:1,on:1});
+addItem(9,'start','START POSITION - playtest spawns here ([ and ] switch)','starts',{});
+
+function pf(k, props){ return {k:k, d:props}; }
+const BUILTIN_PREFABS=[
+  ['TRIPLE SPIKE',[pf('spikes',{gx:0,gy:0}),pf('spikes',{gx:1,gy:0}),pf('spikes',{gx:2,gy:0})]],
+  ['STAIRS',[pf('blocks',{gx:0,gy:0,w:1,h:1}),pf('blocks',{gx:1,gy:0,w:1,h:2}),pf('blocks',{gx:2,gy:0,w:1,h:3})]],
+  ['PILLAR + SPIKE',[pf('blocks',{gx:0,gy:0,w:1,h:3}),pf('spikes',{gx:0,gy:3})]],
+  ['ORB OVER SPIKES',[pf('spikes',{gx:0,gy:0}),pf('spikes',{gx:1,gy:0}),pf('spikes',{gx:2,gy:0}),pf('spikes',{gx:3,gy:0}),pf('orbs',{gx:1.5,gy:2,k:'y'})]],
+  ['PAD LAUNCH',[pf('pads',{gx:0,gy:0,k:'y'}),pf('spikes',{gx:2,gy:0}),pf('spikes',{gx:3,gy:0}),pf('spikes',{gx:4,gy:0}),pf('spikes',{gx:5,gy:0})]],
+  ['PLATFORM HOPS',[pf('blocks',{gx:0,gy:1,w:2,h:0.5}),pf('blocks',{gx:4,gy:2,w:2,h:0.5}),pf('blocks',{gx:8,gy:3,w:2,h:0.5}),pf('spikes',{gx:2,gy:0}),pf('spikes',{gx:3,gy:0}),pf('spikes',{gx:6,gy:0}),pf('spikes',{gx:7,gy:0})]],
+  ['SHIP CORRIDOR',[pf('blocks',{gx:0,gy:0,w:8,h:1,t:2}),pf('blocks',{gx:0,gy:6,w:8,h:1,t:2}),pf('spikes',{gx:2,gy:1}),pf('spikes',{gx:5,gy:1}),pf('spikes',{gx:3,gy:5,r:1}),pf('spikes',{gx:6,gy:5,r:1})]],
+  ['WAVE SAWTOOTH',[pf('slopes',{gx:0,gy:0,o:0}),pf('slopes',{gx:1,gy:0,o:1}),pf('slopes',{gx:2,gy:0,o:0}),pf('slopes',{gx:3,gy:0,o:1}),
+    pf('slopes',{gx:1,gy:4,o:3}),pf('slopes',{gx:2,gy:4,o:2}),pf('slopes',{gx:3,gy:4,o:3}),pf('slopes',{gx:4,gy:4,o:2})]],
+  ['WAVE BLOCK SLIDE',[pf('blocks',{gx:0,gy:0,w:6,h:1,t:3}),pf('blocks',{gx:0,gy:0,w:6,h:1,t:T_D}),pf('blocks',{gx:0,gy:4,w:6,h:1,t:3}),pf('blocks',{gx:0,gy:4,w:6,h:1,t:T_D})]],
+  ['SAW TRAP',[pf('blocks',{gx:0,gy:0,w:3,h:1,t:4}),pf('saws',{gx:1,gy:1,k:0,sz:1})]],
+  ['GRAVITY FLIP',[pf('pads',{gx:0,gy:0,k:'b'}),pf('blocks',{gx:0,gy:5,w:7,h:1}),pf('spikes',{gx:3,gy:4,r:1}),pf('spikes',{gx:5,gy:0})]],
+  ['FIRE PIT',[pf('blocks',{gx:0,gy:0,w:4,h:1,t:20}),pf('decos',{gx:0,gy:1,k:29,z:6}),pf('decos',{gx:1,gy:1,k:28,z:6}),pf('decos',{gx:2,gy:1,k:29,z:6}),pf('decos',{gx:3,gy:1,k:30,z:6}),pf('spikes',{gx:1,gy:1,inv:1}),pf('spikes',{gx:2,gy:1,inv:1})]],
+  ['TORCH GATE',[pf('blocks',{gx:0,gy:0,w:1,h:3,t:21}),pf('blocks',{gx:4,gy:0,w:1,h:3,t:21}),pf('decos',{gx:0,gy:3,k:31,z:3}),pf('decos',{gx:4,gy:3,k:31,z:3}),pf('decos',{gx:2,gy:0,k:41,z:1})]]
+];
+function getMyPrefabs(){ try{ const a=JSON.parse(localStorage.getItem('jd_prefabs')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+function setMyPrefabs(a){ try{ localStorage.setItem('jd_prefabs', JSON.stringify(a)); }catch(e){ edToast('Storage full - prefab not saved'); } }
 const ITEM_BY_ID={};
+function rebuildPrefabs(){
+  const items=[];
+  BUILTIN_PREFABS.forEach(function(p,i){ items.push({id:'pf'+i, name:'PREFAB: '+p[0], k:'prefab', pf:p[1]}); });
+  getMyPrefabs().forEach(function(p){ items.push({id:'mp'+p.id, name:'MY PREFAB: '+p.name, k:'prefab', pf:p.objs}); });
+  CATS[CAT_PREFAB].items.forEach(function(it){ delete ITEM_BY_ID[it.id]; delete iconCache[it.id]; });
+  CATS[CAT_PREFAB].items=items;
+  items.forEach(function(it){ ITEM_BY_ID[it.id]=it; });
+}
 CATS.forEach(function(c){ c.items.forEach(function(it){ ITEM_BY_ID[it.id]=it; }); });
+function itemObjs(it, gx, gy){
+  if(it.k==='prefab') return it.pf.map(function(c){
+    const o=normObj(c.k, c.d); if(!o) return null;
+    o.gx=rnd4(o.gx+gx); o.gy=rnd4(o.gy+gy);
+    if(edLayer>0) o.el=edLayer;
+    return o;
+  }).filter(Boolean);
+  const raw=it.make(gx,gy);
+  if(edLayer>0) raw.el=edLayer;
+  const o=normObj(it.k, raw);
+  return o?[o]:[];
+}
 
 // ---------- geometry ----------
 const DRAWFN={spikes:drawSpike, blocks:drawBlock, portals:drawPortal, speeds:drawSpeed, orbs:drawOrb,
@@ -104,6 +163,7 @@ function objBox(o){
   let hw=0.5, hh=0.5;
   switch(o._k){
     case 'blocks': hw=o.w/2; hh=o.h/2; break;
+    case 'slopes': hw=(o.w||1)/2; break;
     case 'portals': hw=0.55; hh=1.6; break;
     case 'speeds': hw=0.5; hh=0.8; break;
     case 'saws': hw=hh=SAW_R[o.sz||0]; break;
@@ -279,14 +339,60 @@ function sameObj(a,b){ return JSON.stringify(packObj(a))===JSON.stringify(packOb
 function placeAt(gx,gy){
   const it=ITEM_BY_ID[edItem]; if(!it) return;
   if(gy<-4 || gy>500) return;
-  const raw=it.make(gx,gy);
-  if(edLayer>0) raw.el=edLayer;
-  const o=normObj(it.k, raw); if(!o) return;
-  if(ED[it.k].some(function(x){ return sameObj(x,o); })) return;
-  ED[it.k].push(o);
+  const added=[];
+  itemObjs(it,gx,gy).forEach(function(o){
+    if(ED[o._k].some(function(x){ return sameObj(x,o); })) return;
+    ED[o._k].push(o); added.push(o);
+  });
+  if(!added.length) return;
   if(it.k==='starts'){ activeStart=ED.starts.length-1; edToast('Start '+ED.starts.length+' is now active for playtests'); }
   else if(it.k==='triggers' && !EDO.swipe) edToast('Trigger placed - EDIT SPECIAL sets it up');
-  edSel=[o];
+  edSel=added;
+}
+function savePrefab(){
+  if(!needSel()) return;
+  const name=window.prompt('Name for this prefab?','MY PREFAB');
+  if(name===null) return;
+  let x0=1e9, y0=1e9;
+  edSel.forEach(function(o){ const a=boxAABB(objBox(o)); x0=Math.min(x0,a.x0); y0=Math.min(y0,a.y0); });
+  const dx=Math.floor(x0+1e-6), dy=Math.floor(y0+1e-6);
+  const objs=edSel.filter(function(o){ return o._k!=='starts'; }).map(function(o){
+    const d=packObj(o); delete d.el; d.gx=rnd4(o.gx-dx); d.gy=rnd4((o.gy||0)-dy); return {k:o._k, d:d};
+  });
+  if(!objs.length){ edToast('Start positions can\'t go in prefabs'); return; }
+  const all=getMyPrefabs();
+  all.push({id:Date.now().toString(36), name:((name||'').trim()||'MY PREFAB').toUpperCase().slice(0,24), objs:objs});
+  setMyPrefabs(all); rebuildPrefabs();
+  if(edMode==='build') buildPalette();
+  edToast('Prefab saved - it\'s in the PREFABS tab (last tab)');
+}
+function sameKey(o){ return [o._k, o.t, o.k, o.m, o.type, o.sz||0, o.o, o.inv||0].join('|'); }
+function selectSame(){
+  if(!needSel()) return;
+  const key=sameKey(edSel[0]);
+  edSel=[]; eachObj(function(x){ if(layerOk(x) && sameKey(x)===key) edSel.push(x); });
+  refreshEdUI(); edToast('Selected '+edSel.length+' matching objects');
+}
+function playHere(){
+  stopPreview(); closeModal(); saveDraft();
+  if(objCount(ED)<1){ edToast('Place something first'); return; }
+  setView(edZoom, edVT);
+  const gx=Math.max(0, Math.floor((edCamX+W*0.25)/B)), cxm=gx+0.5;
+  let gy=0;
+  for(let n=0;n<60;n++){
+    let up=null;
+    ED.blocks.forEach(function(b){
+      if(b.t===T_D || b.t===T_LINES || b.rot) return;
+      const bw=b.w*(b.sc||1), bh=b.h*(b.sc||1), by=b.gy||0;
+      if(b.gx<=cxm && b.gx+bw>=cxm && by<=gy+0.01 && by+bh>gy+0.01) up=Math.max(up||0, by+bh);
+    });
+    if(up===null) break;
+    gy=up;
+  }
+  spawnStart={gx:gx, gy:gy};
+  edTrail=[]; edDeath=null;
+  initAudio();
+  startPlay(prepLevel(ED),'edtest');
 }
 function eraseTop(fx,fy){
   const h=hitsAt(fx,fy); if(!h.length) return false;
@@ -334,7 +440,10 @@ const PANEL=[
   ['PASTE COLOR','sky',pasteColor],
   ['@color','dark',openColorModal],
   ['GO TO LAYER','slate',function(){ if(!needSel()) return; edLayer=edSel[0].el|0; refreshEdUI(); }],
-  ['DE- SELECT','lime',function(){ edSel=[]; refreshEdUI(); }]
+  ['DE- SELECT','lime',function(){ edSel=[]; refreshEdUI(); }],
+  ['SAVE PREFAB','tan',savePrefab],
+  ['SELECT SAME','violet',selectSame],
+  ['PLAY HERE','green',function(){ playHere(); }]
 ];
 const EDIT_ACTS=[
   ['↑','1',function(){ moveSel(0,1); }], ['↓','1',function(){ moveSel(0,-1); }],
@@ -361,6 +470,7 @@ const EDIT_ACTS=[
 ];
 function buildEditorDOM(){
   if(edBuilt) return; edBuilt=true;
+  rebuildPrefabs();
   editorEl.innerHTML=
     '<div class="edtl"><button class="cbtn" id="eUndo" title="Undo (Ctrl+Z)">'+IC.undo+'</button>'
     +'<button class="cbtn" id="eRedo" title="Redo (Ctrl+Y)">'+IC.redo+'</button>'
@@ -374,7 +484,7 @@ function buildEditorDOM(){
     +'<button class="cbtn sm" id="eZout" title="Zoom out">'+IC.zout+'</button></div>'
     +'<div class="edrt"><div class="edpanel" id="ePanel"></div>'
     +'<div class="edlayer"><button class="larr" id="eLprev">&#9664;</button><span id="eLnum">ALL</span><button class="larr" id="eLnext">&#9654;</button></div></div>'
-    +'<div id="edinfo"></div>'
+    +'<div id="edinfo"></div><div id="edcoord"></div>'
     +'<div class="edbot">'
       +'<div class="edmodes"><button class="mode" data-m="build">BUILD</button><button class="mode" data-m="edit">EDIT</button><button class="mode" data-m="delete">DELETE</button></div>'
       +'<div class="edmid"><div class="edtabs" id="eTabs"></div>'
@@ -423,8 +533,7 @@ function buildTabs(){
     const b=document.createElement('button');
     b.className='etab'+(i===edCat?' on':'');
     b.title=c.name;
-    const img=document.createElement('img'); img.src=iconFor(c.items[Math.min(c.items.length-1, i===4?0:(i===9?12:0))]); img.alt='';
-    b.appendChild(img);
+    if(c.items.length){ const img=document.createElement('img'); img.src=iconFor(c.items[0]); img.alt=''; b.appendChild(img); }
     b.addEventListener('click', function(e){ e.stopPropagation(); edCat=i; edPage=0; buildPalette(); });
     tabs.appendChild(b);
   });
@@ -433,20 +542,21 @@ const iconCache={};
 function iconFor(it){
   if(iconCache[it.id]) return iconCache[it.id];
   const size=64;
-  const o=normObj(it.k, it.make(0,0));
-  const b=boxAABB(objBox(o));
-  const ext=Math.max(b.x1-b.x0, b.y1-b.y0, 1);
-  const k=Math.min(size*0.78/(ext*B), 1.1);
   const svLayer=edLayer, svCam=camX, svOff=groupOff;
   edLayer=-1; camX=0; groupOff={};
+  const objs=itemObjs(it,0,0);
+  const b={x0:1e9,x1:-1e9,y0:1e9,y1:-1e9};
+  objs.forEach(function(o){ const a=boxAABB(objBox(o)); b.x0=Math.min(b.x0,a.x0); b.x1=Math.max(b.x1,a.x1); b.y0=Math.min(b.y0,a.y0); b.y1=Math.max(b.y1,a.y1); });
+  const ext=Math.max(b.x1-b.x0, b.y1-b.y0, 1);
+  const k=Math.min(size*0.78/(ext*B), 1.1);
   loadChannels(ED.cc);
-  if(it.k==='blocks' && o.t===8) chCur[1]=[120,190,255];
+  if(objs.some(function(o){ return o._k==='blocks' && o.t===8; })) chCur[1]=[120,190,255];
   ctx.save();
   ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,size,size);
   const cxw=(b.x0+b.x1)/2*B, cyw=groundY-(b.y0+b.y1)/2*B;
   ctx.setTransform(k,0,0,k, size/2-k*cxw, size/2-k*cyw);
   const svW=W; if(W<size*4) W=size*40;
-  drawOne(o);
+  objs.forEach(drawOne);
   W=svW;
   ctx.restore();
   const c=document.createElement('canvas'); c.width=size; c.height=size;
@@ -734,7 +844,7 @@ window.addEventListener('pointerup', function(){
   }
 });
 window.addEventListener('wheel', function(e){
-  if(state!=='edit' || modalOpen()) return;
+  if(state!=='edit' || modalOpen() || setOpen) return;
   setView(edZoom, edVT);
   if(e.ctrlKey){ zoomBy(e.deltaY>0?1.12:1/1.12, e.clientX, e.clientY); return; }
   if(e.shiftKey){ edVT+=(e.deltaY||e.deltaX)/Z; }
@@ -754,30 +864,40 @@ function edKey(e){
   else if(ctrl && k==='KeyC') copySel();
   else if(ctrl && k==='KeyV') pasteAt(edHover?{gx:Math.floor(edHover.fx), gy:Math.max(0,Math.floor(edHover.fy))}:null);
   else if(ctrl && k==='KeyD') duplicateSel();
+  else if(ctrl && e.shiftKey && k==='KeyA') selectSame();
   else if(ctrl && k==='KeyA'){ edSel=[]; eachObj(function(o){ if(layerOk(o)) edSel.push(o); }); refreshEdUI(); }
   else if(ctrl && k==='KeyS'){ saveDraft(); edToast('Saved'); }
-  else if(k==='Delete' || k==='Backspace') deleteSel();
-  else if(k==='Digit1') setEdMode('build');
-  else if(k==='Digit2') setEdMode('edit');
-  else if(k==='Digit3') setEdMode('delete');
-  else if(k==='Enter' || k==='NumpadEnter') startEdTest();
-  else if(k==='Space'){ if(!e.repeat){ spaceHeld=true; } }
+  else if(ctrl) handled=false;
   else if(k==='Escape'){ if(ptr) ptr=null; else if(edSel.length){ edSel=[]; refreshEdUI(); } else openEdMenu(); }
-  else if(k==='BracketLeft' || k==='BracketRight') cycleStart(k==='BracketRight'?1:-1);
-  else if(k==='Equal' || k==='NumpadAdd') zoomBy(1/1.25);
-  else if(k==='Minus' || k==='NumpadSubtract') zoomBy(1.25);
-  else if(k==='KeyQ' || k==='KeyE'){ if(edSel.length) rotSel((k==='KeyE'?1:-1)*(e.shiftKey?45:90)); }
-  else if(k==='KeyW'||k==='KeyA'||k==='KeyS'||k==='KeyD'||k==='ArrowUp'||k==='ArrowDown'||k==='ArrowLeft'||k==='ArrowRight'){
+  else if(keyIs(e,'edel')) deleteSel();
+  else if(keyIs(e,'ebuild')) setEdMode('build');
+  else if(keyIs(e,'eedit')) setEdMode('edit');
+  else if(keyIs(e,'edelete')) setEdMode('delete');
+  else if(keyIs(e,'ehere')) playHere();
+  else if(keyIs(e,'etest')) startEdTest();
+  else if(keyIs(e,'emusic')){ if(pv) stopPreview(); else startPreview(); }
+  else if(keyIs(e,'epan')){ if(!e.repeat) spaceHeld=true; }
+  else if(keyIs(e,'eprev')) cycleStart(-1);
+  else if(keyIs(e,'enext')) cycleStart(1);
+  else if(keyIs(e,'ezin')) zoomBy(1/1.25);
+  else if(keyIs(e,'ezout')) zoomBy(1.25);
+  else if(keyIs(e,'erotr') || keyIs(e,'erotl')){ if(edSel.length) rotSel((keyIs(e,'erotr')?1:-1)*(e.shiftKey?45:90)); }
+  else if(keyIs(e,'eflipx')){ if(edSel.length) flipSel(true); }
+  else if(keyIs(e,'eflipy')){ if(edSel.length) flipSel(false); }
+  else if(keyIs(e,'eswipe')){ EDO.swipe=!EDO.swipe; saveEdo(); refreshEdUI(); edToast('Swipe '+(EDO.swipe?'ON':'OFF')); }
+  else if(keyIs(e,'ehome')){ edCamX=-3*B; clampCam(); }
+  else if(keyIs(e,'eend')){ setView(edZoom,edVT); edCamX=(maxGx(ED)+10)*B-W*0.6; clampCam(); }
+  else if(keyIs(e,'eup')||keyIs(e,'edown')||keyIs(e,'eleft')||keyIs(e,'eright')){
     const d=e.shiftKey?0.1:(e.altKey?0.5:1);
-    const dx=(k==='KeyA'||k==='ArrowLeft')?-d:(k==='KeyD'||k==='ArrowRight')?d:0;
-    const dy=(k==='KeyW'||k==='ArrowUp')?d:(k==='KeyS'||k==='ArrowDown')?-d:0;
+    const dx=keyIs(e,'eleft')?-d:keyIs(e,'eright')?d:0;
+    const dy=keyIs(e,'eup')?d:keyIs(e,'edown')?-d:0;
     if(edSel.length) moveSel(dx,dy);
     else { setView(edZoom,edVT); edCamX+=dx*B*4; edVT-=dy*B*2; clampCam(); }
   }
   else handled=false;
   if(handled) e.preventDefault();
 }
-window.addEventListener('keyup', function(e){ if(e.code==='Space') spaceHeld=false; });
+window.addEventListener('keyup', function(e){ if(keyIs(e,'epan')) spaceHeld=false; });
 function cycleStart(dir){
   const n=ED.starts.length;
   if(!n){ edToast('No start positions yet - SPECIAL tab has them'); return; }
@@ -839,6 +959,11 @@ function openObjModal(special){
     }
     const cc=commonVal(S,function(o){return o.c||0;});
     h+=fieldRow('COLOR', '<select id="fC">'+(cc===undefined?'<option value="">mixed</option>':'')+chOptions(cc,true)+'</select>');
+    if(plain.length){
+      const ci=commonVal(plain,function(o){return o.inv?1:0;});
+      h+=fieldRow('INVISIBLE (fades out near the player)', '<select id="fInv">'+(ci===undefined?'<option value="">mixed</option>':'')
+        +'<option value="0"'+(ci===0?' selected':'')+'>NO</option><option value="1"'+(ci===1?' selected':'')+'>YES</option></select>');
+    }
     h+=fieldRow('EDITOR LAYER', numIn('fEl', commonVal(S,function(o){return o.el||0;}), 1, 'min="0" max="99"'));
     if(oneKind==='decos') h+=fieldRow('Z LAYER (0-4 behind, 5-10 in front)', numIn('fZ', commonVal(S,function(o){return o.z!=null?o.z:2;}), 1, 'min="0" max="10"'));
   }
@@ -862,16 +987,33 @@ function openObjModal(special){
       h+=fieldRow('TARGET GROUP', numIn('tG', commonVal(S,function(x){return x.g;}), 1, 'min="0"'));
       h+=fieldRow('OPACITY (0-1)', numIn('tA', commonVal(S,function(x){return x.a;}), 0.05, 'min="0" max="1"'));
       h+=fieldRow('FADE TIME (s)', numIn('tDur', commonVal(S,function(x){return x.dur;}), 0.1, 'min="0"'));
+    } else if(t==='spawn'){
+      h+=fieldRow('SPAWN GROUP (fires triggers whose own group is this)', numIn('tG', commonVal(S,function(x){return x.g;}), 1, 'min="0"'));
+      h+=fieldRow('DELAY (s)', numIn('tDl', commonVal(S,function(x){return x.dl||0;}), 0.1, 'min="0"'));
+    } else if(t==='toggle'){
+      const on=commonVal(S,function(x){return x.on?1:0;});
+      h+=fieldRow('TARGET GROUP', numIn('tG', commonVal(S,function(x){return x.g;}), 1, 'min="0"'));
+      h+=fieldRow('TURN GROUP', '<select id="tOn">'+(on===undefined?'<option value="">mixed</option>':'')
+        +'<option value="0"'+(on===0?' selected':'')+'>OFF (hide + no hitbox)</option><option value="1"'+(on===1?' selected':'')+'>ON</option></select>');
     }
+    h+='<div class="msec">SPAWNING</div>';
+    h+=fieldRow('TRIGGER\'S OWN GROUP', numIn('tTg', commonVal(S,function(x){return x.tg||0;}), 1, 'min="0"'));
+    h+=fieldRow('SPAWN TRIGGERED (only fires from a spawn trigger)', '<input type="checkbox" id="tSp"'+(S.every(function(x){return x.sp;})?' checked':'')+'>');
+    h+='<div class="mhint">Give triggers an own group, then a spawn trigger with that group fires all of them at once (after its delay). Tick SPAWN TRIGGERED so they don\'t also fire when you pass them.</div>';
   } else if(oneKind==='decos' && S.every(function(x){ return x.k===DECO_TEXT; })){
     h+=fieldRow('TEXT', '<input type="text" id="tTx" maxlength="60" value="'+escHtml(S.length===1?o.tx:'')+'">');
   } else if(oneKind==='blocks' && S.length===1){
     h+=fieldRow('WIDTH (blocks)', numIn('tW', o.w, 0.5, 'min="0.05"'));
     h+=fieldRow('HEIGHT (blocks)', numIn('tH', o.h, 0.5, 'min="0.05"'));
-    h+=fieldRow('STYLE', '<select id="tT">'+BLOCK_NAMES.concat(['SOLID COLOR','GLASS']).map(function(n,i){ return '<option value="'+i+'"'+(o.t===i?' selected':'')+'>'+n+'</option>'; }).join('')+'</select>');
+    h+=fieldRow('STYLE', '<select id="tT">'+STYLE_NAMES.map(function(n,i){ return '<option value="'+i+'"'+(o.t===i?' selected':'')+'>'+n+'</option>'; }).join('')+'</select>');
+    if(o.t===T_OUTLINE || o.t===T_LINES){
+      const e=o.e!=null?o.e:15;
+      h+='<div class="msec">OUTLINE EDGES</div><div class="mrowb">'+[[1,'TOP'],[2,'RIGHT'],[4,'BOTTOM'],[8,'LEFT']].map(function(q){
+        return '<label class="frow"><input type="checkbox" data-edge="'+q[0]+'"'+((e&q[0])?' checked':'')+'> '+q[1]+'</label>'; }).join('')+'</div>';
+    }
   } else if(oneKind==='orbs'){
     const k=commonVal(S,function(x){return x.k;});
-    h+=fieldRow('ORB TYPE', '<select id="tOk">'+[['y','YELLOW'],['p','PINK'],['r','RED'],['b','BLUE'],['k','BLACK'],['d','DASH']].map(function(p){ return '<option value="'+p[0]+'"'+(k===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join('')+'</select>');
+    h+=fieldRow('ORB TYPE', '<select id="tOk">'+[['y','YELLOW'],['p','PINK'],['r','RED'],['b','BLUE'],['g','GREEN'],['k','BLACK'],['d','DASH']].map(function(p){ return '<option value="'+p[0]+'"'+(k===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join('')+'</select>');
     if(special) h+='<div class="mhint">Dash orbs dash in the direction they point - rotate them up to 70° up or down.</div>';
   } else if(oneKind==='portals'){
     const m=commonVal(S,function(x){return x.m;});
@@ -907,6 +1049,46 @@ function openObjModal(special){
   bind('tT','change',function(el){ S[0].t=+el.value; });
   bind('tOk','change',function(el){ S.forEach(function(x){ x.k=el.value; }); });
   bind('tPm','change',function(el){ S.forEach(function(x){ x.m=el.value; }); });
+  bind('fInv','change',function(el){ if(el.value==='') return; plain.forEach(function(x){ if(+el.value) x.inv=1; else delete x.inv; }); });
+  bind('tDl','change',function(el){ const v=numv(el); if(v==null) return; S.forEach(function(x){ x.dl=Math.max(0,Math.min(600,v)); }); });
+  bind('tOn','change',function(el){ if(el.value==='') return; S.forEach(function(x){ x.on=+el.value?1:0; }); });
+  bind('tTg','change',function(el){ const v=numv(el); if(v==null) return; S.forEach(function(x){ const g=Math.max(0,v|0); if(g) x.tg=g; else delete x.tg; }); });
+  bind('tSp','change',function(el){ S.forEach(function(x){ if(el.checked) x.sp=1; else delete x.sp; }); });
+  $('edmbox').querySelectorAll('input[data-edge]').forEach(function(inp){
+    inp.addEventListener('change', mut(function(){
+      let e=0;
+      $('edmbox').querySelectorAll('input[data-edge]').forEach(function(c){ if(c.checked) e|=+c.dataset.edge; });
+      if(e===15) delete S[0].e; else S[0].e=e;
+    }));
+  });
+}
+function openPrefabModal(){
+  const all=getMyPrefabs();
+  let h='<div class="mhint">Select objects in EDIT mode and press SAVE PREFAB to make one. Prefabs are in the PREFABS tab (the last tab) and are saved in this browser.</div>';
+  if(!all.length) h+='<div class="mhint"><b>No prefabs saved yet.</b></div>';
+  all.forEach(function(p){
+    h+='<div class="pfrow"><span>'+escHtml(p.name)+' ('+p.objs.length+' objects)</span>'
+      +'<button class="pbtn sky small" data-ren="'+p.id+'">RENAME</button><button class="pbtn red small" data-del="'+p.id+'">DELETE</button></div>';
+  });
+  openModal('MY PREFABS', h);
+  const box=$('edmbox');
+  box.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(!window.confirm('Delete this prefab?')) return;
+      setMyPrefabs(getMyPrefabs().filter(function(p){ return p.id!==b.dataset.del; }));
+      rebuildPrefabs(); buildPalette(); openPrefabModal();
+    });
+  });
+  box.querySelectorAll('[data-ren]').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      const all2=getMyPrefabs(), p=all2.filter(function(x){ return x.id===b.dataset.ren; })[0]; if(!p) return;
+      const n=window.prompt('New name:', p.name); if(n===null) return;
+      p.name=((n||'').trim()||p.name).toUpperCase().slice(0,24);
+      setMyPrefabs(all2); rebuildPrefabs(); buildPalette(); openPrefabModal();
+    });
+  });
 }
 function nextFreeGroup(){
   const used={};
@@ -963,14 +1145,17 @@ function openEdMenu(){
     +'<button class="pbtn blue wide" id="mCode">COPY LEVEL CODE</button>'
     +'<button class="pbtn blue wide" id="mImport">IMPORT CODE INTO THIS LEVEL</button>'
     +(n?'<div class="mrowb"><button class="pbtn gray" id="mSp">&#9664;</button><span class="mstart">START POS '+(activeStart+1)+' / '+n+'</span><button class="pbtn gray" id="mSn">&#9654;</button></div>':'')
+    +'<button class="pbtn green wide" id="mPlayHere">PLAYTEST FROM SCREEN</button>'
+    +'<button class="pbtn violet wide" id="mPrefabs">MY PREFABS</button>'
+    +'<button class="pbtn gray wide" id="mSettings">SETTINGS &amp; KEYS</button>'
     +'<button class="pbtn red wide" id="mClear">CLEAR LEVEL</button>'
     +'<button class="pbtn tan wide" id="mExit">SAVE &amp; EXIT</button>'
     +'</div><details class="mkeys"><summary>KEYBOARD SHORTCUTS</summary>'
-    +'1/2/3 build / edit / delete &middot; Enter playtest &middot; Ctrl+Z / Ctrl+Y undo / redo<br>'
-    +'Ctrl+C copy &middot; Ctrl+V paste at mouse &middot; Ctrl+D duplicate &middot; Ctrl+A select all &middot; Del delete<br>'
-    +'WASD / arrows move 1 block (Shift 0.1, Alt 0.5) &middot; Q / E rotate 90 (Shift 45)<br>'
-    +'Wheel scroll &middot; Shift+wheel up/down &middot; Ctrl+wheel zoom &middot; Space or right-drag pans<br>'
-    +'[ and ] switch start position &middot; Shift+tap adds to selection &middot; Shift+drag box-selects</details>';
+    +keyList('ebuild')+' / '+keyList('eedit')+' / '+keyList('edelete')+' build / edit / delete &middot; '+keyList('etest')+' playtest &middot; '+keyList('ehere')+' playtest from screen &middot; '+keyList('emusic')+' music<br>'
+    +'Ctrl+Z / Ctrl+Y undo / redo &middot; Ctrl+C copy &middot; Ctrl+V paste at mouse &middot; Ctrl+D duplicate &middot; Ctrl+A select all &middot; Ctrl+Shift+A select same &middot; '+keyList('edel')+' delete<br>'
+    +'Move '+keyList('eup')+' &middot; '+keyList('edown')+' &middot; '+keyList('eleft')+' &middot; '+keyList('eright')+' (Shift 0.1, Alt 0.5) &middot; Rotate '+keyList('erotl')+' / '+keyList('erotr')+' (Shift 45) &middot; Flip '+keyList('eflipx')+' / '+keyList('eflipy')+'<br>'
+    +'Wheel scroll &middot; Shift+wheel up/down &middot; Ctrl+wheel zoom &middot; '+keyList('epan')+' or right-drag pans &middot; '+keyList('ehome')+' / '+keyList('eend')+' level start / end &middot; '+keyList('eswipe')+' swipe<br>'
+    +'Change any of these in SETTINGS &amp; KEYS.</details>';
   openModal('EDITOR', h);
   function on(id, fn){ const el=$(id); if(el) el.addEventListener('click', function(e){ e.stopPropagation(); fn(); }); }
   on('mResume', closeModal);
@@ -1003,6 +1188,9 @@ function openEdMenu(){
     pushUndo(); KINDS.forEach(function(k){ ED[k]=[]; }); edSel=[]; activeStart=0; saveDraft(); closeModal();
   });
   on('mExit', exitEditor);
+  on('mPlayHere', playHere);
+  on('mPrefabs', openPrefabModal);
+  on('mSettings', function(){ closeModal(); openSettingsScreen(); });
 }
 
 // ---------- level settings (gear) ----------
@@ -1218,8 +1406,9 @@ function renderEditor(){
       const gx=Math.floor(edHover.fx), gy=Math.floor(edHover.fy);
       ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.lineWidth=2;
       ctx.strokeRect(gx*B-camX, groundY-(gy+1)*B, B, B);
-      const o=normObj(it.k, it.make(gx,gy));
-      ctx.save(); ctx.globalAlpha=0.4; drawOne(o); ctx.restore();
+      const svL=edLayer; edLayer=-1;
+      const objs=itemObjs(it,gx,gy); edLayer=svL;
+      ctx.save(); ctx.globalAlpha=0.4; objs.forEach(drawOne); ctx.restore();
     }
   } else if(edMode==='delete' && edHover){
     const h=hitsAt(edHover.fx, edHover.fy);
@@ -1250,6 +1439,11 @@ function renderEditor(){
   }
 
   hudView();
+  const ce=$('edcoord');
+  if(ce){
+    const txt=(edHover?('X '+Math.floor(edHover.fx)+'   Y '+Math.floor(edHover.fy)+'   •   '):'')+objCount(ED)+' objects';
+    if(ce.textContent!==txt) ce.textContent=txt;
+  }
   const sc=$('eScroll');
   if(sc && document.activeElement!==sc) sc.value=''+Math.round(edCamX/B*10);
   if(hintMsg && performance.now()-hintT>3600){ hintMsg=''; edHint(); }
