@@ -92,6 +92,7 @@ addItem(4,'orbb','BLUE ORB - flips gravity','orbs',{k:'b'});
 addItem(4,'orbg','GREEN ORB - flips gravity AND jumps','orbs',{k:'g'});
 addItem(4,'orbk','BLACK ORB - slams you down','orbs',{k:'k'});
 addItem(4,'orbd','DASH ORB - hold to dash in its arrow direction (rotate it to aim)','orbs',{k:'d'});
+addItem(4,'orbq','PINK DASH ORB - hold to dash, letting go flips gravity (rotate it to aim)','orbs',{k:'q'});
 addItem(4,'pady','YELLOW PAD','pads',{k:'y'});
 addItem(4,'padp','PINK PAD','pads',{k:'p'});
 addItem(4,'padb','BLUE PAD - flips gravity','pads',{k:'b'});
@@ -1021,7 +1022,7 @@ function openObjModal(special){
     }
   } else if(oneKind==='orbs'){
     const k=commonVal(S,function(x){return x.k;});
-    h+=fieldRow('ORB TYPE', '<select id="tOk">'+[['y','YELLOW'],['p','PINK'],['r','RED'],['b','BLUE'],['g','GREEN'],['k','BLACK'],['d','DASH']].map(function(p){ return '<option value="'+p[0]+'"'+(k===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join('')+'</select>');
+    h+=fieldRow('ORB TYPE', '<select id="tOk">'+[['y','YELLOW'],['p','PINK'],['r','RED'],['b','BLUE'],['g','GREEN'],['k','BLACK'],['d','DASH'],['q','PINK DASH']].map(function(p){ return '<option value="'+p[0]+'"'+(k===p[0]?' selected':'')+'>'+p[1]+'</option>'; }).join('')+'</select>');
     if(special) h+='<div class="mhint">Dash orbs dash in the direction they point - rotate them up to 70° up or down.</div>';
   } else if(oneKind==='portals'){
     const m=commonVal(S,function(x){return x.m;});
