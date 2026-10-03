@@ -60,6 +60,9 @@ addItem(0,'dblock','D BLOCK - put it over blocks so the wave can slide on them (
 ['LONG FLOOR RAMP / (2x1)','LONG FLOOR RAMP \\ (2x1)','LONG CEILING RAMP (2x1)','LONG CEILING RAMP 2 (2x1)'].forEach(function(n,o){
   addItem(1,'sll'+o,n,'slopes',{o:o,w:2});
 });
+['STEEP FLOOR RAMP / (1x2)','STEEP FLOOR RAMP \\ (1x2)','STEEP CEILING RAMP (1x2)','STEEP CEILING RAMP 2 (1x2)'].forEach(function(n,o){
+  addItem(1,'slt'+o,n,'slopes',{o:o,h:2});
+});
 ['BIG FLOOR RAMP /','BIG FLOOR RAMP \\','BIG CEILING RAMP','BIG CEILING RAMP 2'].forEach(function(n,o){
   addItem(1,'slb'+o,n,'slopes',{gx:0.5,gy:0.5,o:o,sc:2});
 });
@@ -163,7 +166,7 @@ function objBox(o){
   let hw=0.5, hh=0.5;
   switch(o._k){
     case 'blocks': hw=o.w/2; hh=o.h/2; break;
-    case 'slopes': hw=(o.w||1)/2; break;
+    case 'slopes': hw=(o.w||1)/2; hh=(o.h||1)/2; break;
     case 'portals': hw=0.55; hh=1.6; break;
     case 'speeds': hw=0.5; hh=0.8; break;
     case 'saws': hw=hh=SAW_R[o.sz||0]; break;
@@ -217,14 +220,18 @@ function rotateObjs(list, deg, pv){
   const quarter=Math.abs(deg%90)<1e-6;
   list.forEach(function(o){
     const p=pivotOf(o), dx=p[0]-pv[0], dy=p[1]-pv[1];
-    setCenter(o, pv[0]+dx*c+dy*s, pv[1]-dx*s+dy*c);
-    if(o._k==='triggers' || o._k==='starts') return;
+    const nx=pv[0]+dx*c+dy*s, ny=pv[1]-dx*s+dy*c;
     if(o._k==='slopes'){
-      if(!quarter) return;
+      if(!quarter){ setCenter(o, nx, ny); return; }
       let n=((Math.round(deg/90)%4)+4)%4, v=o.o||0;
+      if(n%2 && (o.w===2 || o.h===2)){
+        if(o.w===2){ delete o.w; o.h=2; } else { delete o.h; o.w=2; }
+      }
       while(n--) v=SLOPE_CW[v];
-      o.o=v; return;
+      o.o=v; setCenter(o, nx, ny); return;
     }
+    setCenter(o, nx, ny);
+    if(o._k==='triggers' || o._k==='starts') return;
     o.rot=normRot((o.rot||0)+deg);
     if(!o.rot) delete o.rot;
   });

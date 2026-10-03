@@ -536,7 +536,7 @@ function normObj(k,a){
       if(o.k===DECO_TEXT) o.tx=(''+(a.tx!=null?a.tx:'TEXT')).slice(0,60);
       break;
     }
-    case 'slopes': o.o=num(a.o!=null?a.o:a.dir,0,0,3)|0; if(+a.w===2) o.w=2; break;
+    case 'slopes': o.o=num(a.o!=null?a.o:a.dir,0,0,3)|0; if(+a.w===2) o.w=2; else if(+a.h===2) o.h=2; break;
     case 'saws': o.k=num(a.k,0,0,2)|0; o.sz=num(a.sz,0,0,2)|0; break;
     case 'triggers':
       if(a.tg) o.tg=num(a.tg,0,0,9999)|0;
@@ -1917,14 +1917,14 @@ function step(){
   let onSlope=false, floorSurf=Infinity, ceilSurf=Infinity;
   if(curL.slopes){
     for(let i=0;i<curL.slopes.length;i++){
-      const s=curL.slopes[i], o=s.o||0, sc=s.sc||1, sw=s.w||1;
+      const s=curL.slopes[i], o=s.o||0, sc=s.sc||1, sw=s.w||1, sh=s.h||1;
       if(isOff(s)) continue;
-      const ccx=egx(s)+sw/2, ccy=egy(s)+0.5;
+      const ccx=egx(s)+sw/2, ccy=egy(s)+sh/2;
       const x0=(ccx-sw*sc/2)*B, x1=(ccx+sw*sc/2)*B;
       const cxp=P.x+PB/2;
       if(cxp <= x0 || cxp >= x1) continue;
       const f=(cxp - x0)/(x1-x0);
-      const baseBot=groundY-(ccy-sc/2)*B, baseTop=groundY-(ccy+sc/2)*B, hgt=baseBot-baseTop;
+      const baseBot=groundY-(ccy-sh*sc/2)*B, baseTop=groundY-(ccy+sh*sc/2)*B, hgt=baseBot-baseTop;
       const ceil=(o>=2), tallLeft=(o===1||o===3);
       const surf=(o===0||o===3) ? baseBot - f*hgt : baseTop + f*hgt;
       const entered=((cxp-spd) <= x0);

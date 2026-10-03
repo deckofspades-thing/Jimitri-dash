@@ -583,9 +583,9 @@ function drawSaw(s){
   ctx.lineJoin='miter';
 }
 function drawSlope(s){
-  const gx=egx(s), gy=egy(s), x=gx*B-camX, o=s.o||0, R=x+(s.w||1)*B;
+  const gx=egx(s), gy=egy(s), x=gx*B-camX, o=s.o||0, R=x+(s.w||1)*B, sh=s.h||1;
   if(R+cullPad<0 || x-cullPad>W) return;
-  const bot=groundY-gy*B, top=groundY-(gy+1)*B;
+  const bot=groundY-gy*B, top=groundY-(gy+sh)*B;
   ctx.fillStyle='rgba(5,8,20,0.9)';
   ctx.strokeStyle='rgba('+objColorCur+',0.92)'; ctx.lineWidth=2.5; ctx.lineJoin='round';
   ctx.beginPath();
@@ -1122,7 +1122,7 @@ function pivotOf(o){
   if(k==='blocks') return [x+o.w/2, y+o.h/2];
   if(k==='portals') return [x+0.5, y+1.5];
   if(k==='speeds') return [x+0.5, y+0.85];
-  if(k==='slopes') return [x+(o.w||1)/2, y+0.5];
+  if(k==='slopes') return [x+(o.w||1)/2, y+(o.h||1)/2];
   return [x+0.5, y+0.5];
 }
 let objColorCur='255,255,255';
@@ -1392,8 +1392,8 @@ function drawHitboxes(){
   });
   L.slopes.forEach(function(s){
     if(isOff(s)) return;
-    const sw=s.w||1, sc=s.sc||1, ccx=egx(s)+sw/2, ccy=egy(s)+0.5, o=s.o||0;
-    const x0=(ccx-sw*sc/2)*B-camX, x1=(ccx+sw*sc/2)*B-camX, bb=groundY-(ccy-sc/2)*B, bt=groundY-(ccy+sc/2)*B;
+    const sw=s.w||1, sh=s.h||1, sc=s.sc||1, ccx=egx(s)+sw/2, ccy=egy(s)+sh/2, o=s.o||0;
+    const x0=(ccx-sw*sc/2)*B-camX, x1=(ccx+sw*sc/2)*B-camX, bb=groundY-(ccy-sh*sc/2)*B, bt=groundY-(ccy+sh*sc/2)*B;
     if(x0>W || x1<0) return;
     ctx.beginPath();
     if(o===0||o===3){ ctx.moveTo(x0,bb); ctx.lineTo(x1,bt); } else { ctx.moveTo(x0,bt); ctx.lineTo(x1,bb); }
