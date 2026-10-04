@@ -1928,7 +1928,7 @@ function step(){
       P.y = ceilingY() - hbi; P.vy = 0; if(mode==='ball') P.onGround = true;
     }
   } else {
-    if(mode!=='cube' && P.y + hbi <= ceilingY()){
+    if(mode!=='cube' && mode!=='robot' && P.y + hbi <= ceilingY()){
       P.y = ceilingY() - hbi; P.vy = 0; P.onGround = true;
     }
     if(soft && P.y + PB - hbi >= groundY){
