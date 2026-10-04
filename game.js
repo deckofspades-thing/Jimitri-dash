@@ -2058,7 +2058,7 @@ function step(){
     if(mode==='ship'||mode==='wave') P.rot=Math.atan(dash.t);
     else P.rot+=0.32*gdir;
     if(ftick%2===0) particles.push({x:P.x, y:P.y+PB/2, vx:-(2+Math.random()*2), vy:(Math.random()-0.5),
-      g:0, life:16, max:16, size:PB*0.18, col:(dash.flip?'255,90,200':'80,255,120')
+      g:0, life:16, max:16, size:PB*0.18, col:(dash.flip?'255,90,200':'80,255,120')});
   } else if(mode==='ship'){
     const tgt = Math.atan2(P.vy, SPEED*speedMult*2.5);
     P.rot += (tgt - P.rot)*0.3;
