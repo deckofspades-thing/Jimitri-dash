@@ -1036,19 +1036,7 @@ function drawOrb(o, used){
     ctx.beginPath(); ctx.arc(x-r*0.25,y-r*0.3,r*0.28,0,Math.PI*2); ctx.fill();
   }
 }
-  ctx.fillStyle='rgba('+c+','+(0.9*al)+')';
-  ctx.strokeStyle='rgba(255,255,255,'+(0.9*al)+')'; ctx.lineWidth=2.5;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
-  if(o.k==='d'){
-    ctx.save(); ctx.translate(x,y);
-    ctx.strokeStyle='rgba(255,255,255,'+al+')'; ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.beginPath(); ctx.moveTo(-r*0.5,0); ctx.lineTo(r*0.55,0); ctx.moveTo(r*0.2,-r*0.35); ctx.lineTo(r*0.55,0); ctx.lineTo(r*0.2,r*0.35); ctx.stroke();
-    ctx.restore();
-  } else {
-    ctx.fillStyle='rgba(255,255,255,'+(0.7*al)+')';
-    ctx.beginPath(); ctx.arc(x-r*0.25,y-r*0.3,r*0.28,0,Math.PI*2); ctx.fill();
-  }
-}
+
 function drawPad(pd){
   const x=(egx(pd)+0.5)*B-camX, gy=egy(pd);
   if(x<-60-cullPad || x>W+60+cullPad) return;
