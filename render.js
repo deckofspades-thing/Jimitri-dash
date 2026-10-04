@@ -1325,75 +1325,48 @@ function iconRobot(c,s,p,f,c1,c2){
   let ph=0, air=false, rise=false, boost=false;
   if(A){ ph=A.x*0.087; air=A.air; rise=A.vy<0; boost=A.boost; }
   c.lineWidth=3; c.strokeStyle=ICON_DARK; c.lineJoin='round';
-  function box(x,y,w,h,col,r){
-    c.fillStyle=col; iconRR(c,x*s,y*s,w*s,h*s,r); c.fill(); c.stroke();
-  }
+  const TR=2.53, SR=0.73, TL=0.32, SL=0.25;
   function poly(pts,col){
     c.fillStyle=col; c.beginPath();
     pts.forEach(function(q,i){ if(i) c.lineTo(q[0]*s,q[1]*s); else c.moveTo(q[0]*s,q[1]*s); });
     c.closePath(); c.fill(); c.stroke();
   }
-  function leg(hx,col,t,k){
-    c.save(); c.translate(hx*s,0.12*s); c.rotate(t);
-    box(-0.09,0,0.18,0.18,col,3);
-    c.translate(0,0.15*s); c.rotate(k);
-    box(-0.09,0,0.18,0.16,col,3);
-    c.translate(0,0.13*s);
-    box(-0.10,0,0.34,0.09,col,3);
+  function leg(hx,col,t,k,ft){
+    c.save(); c.translate(hx*s,-0.02*s);
+    const ta=TR+t, sa=SR+k;
+    c.rotate(ta);
+    c.fillStyle=col; iconRR(c,-0.10*s,-0.09*s,(TL+0.18)*s,0.18*s,0.09*s); c.fill(); c.stroke();
+    c.translate(TL*s,0);
+    c.rotate(sa-ta);
+    c.fillStyle=col; iconRR(c,-0.04*s,-0.045*s,(SL+0.08)*s,0.09*s,0.04*s); c.fill(); c.stroke();
+    c.translate(SL*s,0);
+    c.rotate(-sa+ft);
+    if(A && air && boost){
+      const fl=0.12+0.05*Math.sin(A.x*0.6);
+      c.fillStyle='#ffb340';
+      c.beginPath(); c.moveTo(-0.05*s,0.16*s); c.lineTo(0.15*s,0.16*s); c.lineTo(0.05*s,(0.16+fl)*s); c.closePath(); c.fill();
+    }
+    poly([[-0.12,0.14],[-0.03,-0.02],[0.07,-0.02],[0.26,0.14]],col);
     c.restore();
   }
-  let ft=0, fk=0, bt=0, bk=0, arm=0, bob=0;
+  let ft1=0, fk1=0, ft2=0, fk2=0, bob=0, toe=0;
   if(A){
     if(!air){
-      ft=Math.sin(ph)*0.6; fk=Math.max(0,Math.sin(ph+1.3))*0.9;
-      bt=Math.sin(ph+Math.PI)*0.6; bk=Math.max(0,Math.sin(ph+1.3+Math.PI))*0.9;
-      arm=-Math.sin(ph)*0.3; bob=-Math.abs(Math.sin(ph))*0.03;
-    } else if(boost){ ft=-0.05; bt=0.05; arm=-0.9; }
-    else if(rise){ ft=-0.5; fk=0.9; bt=0.4; bk=0.7; arm=-0.7; }
-    else { ft=-0.25; fk=0.3; bt=0.25; bk=0.2; arm=-0.3; }
+      ft1=Math.sin(ph)*0.5;           fk1=Math.cos(ph)*0.45;
+      ft2=Math.sin(ph+Math.PI)*0.5;   fk2=Math.cos(ph+Math.PI)*0.45;
+      bob=-Math.abs(Math.sin(ph))*0.025;
+    } else if(boost){ ft1=-0.9; fk1=0.8; ft2=-0.8; fk2=0.7; toe=0.1; }
+    else if(rise){ ft1=0.3; fk1=-0.6; ft2=0.15; fk2=-0.45; toe=-0.3; }
+    else { ft1=-0.35; fk1=0.45; ft2=-0.2; fk2=0.3; toe=0.2; }
   }
-  // legs
-  leg(-0.21,c2,bt,bk);
-  leg(0.19,c1,ft,fk);
-  if(A && air && boost){
-    const fl=0.12+0.05*Math.sin(A.x*0.6);
-    c.fillStyle='#ffb340';
-    [-0.12,0.26].forEach(function(fx){
-      c.beginPath(); c.moveTo((fx-0.08)*s,0.5*s); c.lineTo((fx+0.08)*s,0.5*s); c.lineTo(fx*s,(0.5+fl)*s); c.closePath(); c.fill();
-    });
-  }
-  // body
-  c.save(); c.translate(0,bob*s);
-  box(-0.30,-0.14,0.60,0.30,c1,4);
-  box(-0.18,-0.06,0.36,0.12,c2,2);
-  c.save(); c.translate(0.18*s,-0.04*s); c.rotate(arm);
-  box(0,-0.06,0.26,0.12,c2,3);
+  // back leg, behind the body
+  leg(-0.17,c2,ft2,fk2,toe);
+  // body: the cube skin, slightly tilted
+  c.save(); c.translate(0.05*s,(-0.19+bob)*s); c.rotate(0.05);
+  iconCube(c,0.64*s,p,f,c1,c2);
   c.restore();
-  // head
-  const hy=-0.50, hh=0.38;
-  if(p===2){
-    c.beginPath(); c.moveTo(0,hy*s); c.lineTo(0,(hy-0.10)*s); c.stroke();
-    c.fillStyle=c2; c.beginPath(); c.arc(0,(hy-0.10)*s,0.045*s,0,Math.PI*2); c.fill(); c.stroke();
-  }
-  if(p===3){ box(-0.42,-0.40,0.10,0.18,c2,3); box(0.32,-0.40,0.10,0.18,c2,3); }
-  if(p===5){ poly([[-0.14,hy],[-0.08,hy-0.08],[0.08,hy-0.08],[0.14,hy]],c2); }
-  if(p===4) poly([[-0.34,hy+0.10],[-0.24,hy],[0.24,hy],[0.34,hy+0.10],[0.34,hy+hh],[-0.34,hy+hh]],c1);
-  else box(-0.34,hy,0.68,hh,c1,p===1?12:4);
-  c.fillStyle=ICON_DARK; iconRR(c,-0.27*s,-0.42*s,0.54*s,0.20*s,3); c.fill();
-  c.fillStyle=c2;
-  if(f===0){ iconRR(c,0.02*s,-0.38*s,0.22*s,0.12*s,2); c.fill(); }
-  else if(f===1){
-    iconRR(c,-0.20*s,-0.38*s,0.14*s,0.12*s,2); c.fill();
-    iconRR(c,0.06*s,-0.38*s,0.14*s,0.12*s,2); c.fill();
-  } else if(f===2){
-    c.beginPath(); c.moveTo(-0.22*s,-0.40*s); c.lineTo(-0.04*s,-0.33*s); c.lineTo(-0.04*s,-0.26*s); c.lineTo(-0.22*s,-0.26*s); c.closePath(); c.fill();
-    c.beginPath(); c.moveTo(0.22*s,-0.40*s); c.lineTo(0.04*s,-0.33*s); c.lineTo(0.04*s,-0.26*s); c.lineTo(0.22*s,-0.26*s); c.closePath(); c.fill();
-  } else if(f===3){ iconRR(c,-0.22*s,-0.36*s,0.44*s,0.08*s,2); c.fill(); }
-  else {
-    c.beginPath(); c.arc(0.04*s,-0.32*s,0.08*s,0,Math.PI*2); c.fill();
-    c.fillStyle=ICON_DARK; c.beginPath(); c.arc(0.07*s,-0.32*s,0.035*s,0,Math.PI*2); c.fill();
-  }
-  c.restore();
+  // front leg, over the body
+  leg(-0.10,c2,ft1,fk1,toe);
 }
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
