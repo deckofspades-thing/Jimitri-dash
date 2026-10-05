@@ -1349,6 +1349,40 @@ function iconRobot(c,s,p,f,c1,c2){
     poly([[-0.12,0.14],[-0.03,-0.02],[0.07,-0.02],[0.26,0.14]],col);
     c.restore();
   }
+  function headPic(){
+    const hw=0.35, hh=0.26;
+    function X(u){ return (-hw+u*2*hw)*s; }
+    function Y(v){ return (-hh+v*2*hh)*s; }
+    const R=[
+      [[0,0.52],[0.28,0.35],[0.51,0.72],[0.68,0.64],[0.81,0.81],[1,0.66]],
+      [[0,0.6],[0.25,0.3],[0.5,0.65],[0.75,0.35],[1,0.6]],
+      [[0,0.7],[0.35,0.4],[0.6,0.55],[1,0.3]],
+      [[0,0.55],[0.3,0.55],[0.3,0.4],[0.7,0.4],[0.7,0.65],[1,0.65]],
+      [[0,0.5],[0.15,0.7],[0.3,0.4],[0.45,0.7],[0.6,0.4],[0.75,0.7],[0.9,0.4],[1,0.55]],
+      [[0,0.35],[0.5,0.75],[1,0.35]]
+    ][p%6];
+    const SU=[[0.65,0.36,0.065],[0.25,0.3,0.065],[0.8,0.25,0.05],[0.45,0.3,0.08],[0.65,0.36,0.065]][f%5];
+    c.save();
+    c.fillStyle=c2; iconRR(c,X(0),Y(0),2*hw*s,2*hh*s,0.03*s); c.fill();
+    c.save();
+    iconRR(c,X(0),Y(0),2*hw*s,2*hh*s,0.03*s); c.clip();
+    c.fillStyle=c1; c.beginPath(); c.moveTo(X(0),Y(0)); c.lineTo(X(1),Y(0));
+    for(let i=R.length-1;i>=0;i--) c.lineTo(X(R[i][0]),Y(R[i][1]));
+    c.closePath(); c.fill();
+    c.restore();
+    c.beginPath();
+    R.forEach(function(q,i){ if(i) c.lineTo(X(q[0]),Y(q[1])); else c.moveTo(X(q[0]),Y(q[1])); });
+    c.stroke();
+    iconRR(c,X(0),Y(0),2*hw*s,2*hh*s,0.03*s); c.stroke();
+    c.fillStyle='#fff';
+    c.beginPath();
+    if(f%5===4){
+      const sx=X(SU[0]), sy=Y(SU[1]), r=SU[2]*s*1.3;
+      c.moveTo(sx,sy-r); c.lineTo(sx+r,sy); c.lineTo(sx,sy+r); c.lineTo(sx-r,sy); c.closePath();
+    } else c.arc(X(SU[0]),Y(SU[1]),SU[2]*s,0,Math.PI*2);
+    c.fill(); c.stroke();
+    c.restore();
+  }
   let ft1=0, fk1=0, ft2=0, fk2=0, bob=0, toe=0;
   if(A){
     if(!air){
@@ -1359,14 +1393,11 @@ function iconRobot(c,s,p,f,c1,c2){
     else if(rise){ ft1=0.3; fk1=-0.6; ft2=0.15; fk2=-0.45; toe=-0.3; }
     else { ft1=-0.35; fk1=0.45; ft2=-0.2; fk2=0.3; toe=0.2; }
   }
-  // back leg, behind the body
-  leg(-0.17,c2,ft2,fk2,toe);
-  // body: the cube skin, slightly tilted
-  c.save(); c.translate(0.05*s,(-0.19+bob)*s); c.rotate(0.05);
-  iconCube(c,0.64*s,p,f,c1,c2);
+  leg(-0.17,c1,ft2,fk2,toe);
+  c.save(); c.translate(0.05*s,(-0.2+bob)*s); c.rotate(0.05);
+  headPic();
   c.restore();
-  // front leg, over the body
-  leg(-0.10,c2,ft1,fk1,toe);
+  leg(-0.10,c1,ft1,fk1,toe);
 }
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
