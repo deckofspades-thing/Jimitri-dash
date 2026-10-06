@@ -1323,7 +1323,7 @@ let robotPose=null;
 function iconRobot(c,s,p,f,c1,c2){
   const A=robotPose;
   let ph=0, air=false, rise=false, boost=false;
-  if(A){ ph=A.x*0.087; air=A.air; rise=A.vy<0; boost=A.boost; }
+  if(A){ ph=A.x*0.05; air=A.air; rise=A.vy<0; boost=A.boost; }
   c.lineWidth=3; c.strokeStyle=ICON_DARK; c.lineJoin='round';
   const TR=2.53, SR=0.73, TL=0.32, SL=0.25;
   function poly(pts,col){
