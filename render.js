@@ -1401,25 +1401,91 @@ function iconRobot(c,s,p,f,c1,c2){
   leg(-0.10,c1,ft1,fk1,toe);
 }
 let spiderPose=null;
+let spiderPose=null;
 function iconSpider(c,s,p,f,c1,c2){
   const A=spiderPose;
   const ph=A?A.x*0.06:0, air=A?A.air:false;
-  c.lineJoin='round'; c.lineCap='round';
-  function leg(hx,sg,a){
-    let kx=hx+sg*0.2, ky=0.0, fx=kx+sg*0.1, fy=0.5;
-    if(A && !air){ ky=-0.04*Math.sin(a); fx+=sg*0.05*Math.sin(a+1.2); fy=0.5-Math.max(0,Math.sin(a))*0.14; }
-    else if(A && air){ ky=-0.08; fx=kx+sg*0.16; fy=0.38; }
-    const pts=[[hx,0.08],[kx,ky],[fx,fy]];
-    [[ICON_DARK,0.12],[c2,0.065]].forEach(function(q){
-      c.strokeStyle=q[0]; c.lineWidth=q[1]*s;
-      c.beginPath(); c.moveTo(pts[0][0]*s,pts[0][1]*s); c.lineTo(pts[1][0]*s,pts[1][1]*s); c.lineTo(pts[2][0]*s,pts[2][1]*s); c.stroke();
+  c.lineJoin='round'; c.lineCap='round'; c.lineWidth=3; c.strokeStyle=ICON_DARK;
+  function X(ix){ return (ix/500-0.5)*s; }
+  function Y(iy){ return (iy/316*0.74-0.24)*s; }
+  function R(r){ return r/500*s; }
+  function trace(cmds){
+    c.beginPath();
+    cmds.forEach(function(q){
+      if(q[0]==='M') c.moveTo(X(q[1]),Y(q[2]));
+      else if(q[0]==='L') c.lineTo(X(q[1]),Y(q[2]));
+      else c.quadraticCurveTo(X(q[1]),Y(q[2]),X(q[3]),Y(q[4]));
     });
+    c.closePath();
   }
-  leg(-0.08,-1,ph); leg(-0.18,-1,ph+Math.PI);
-  leg(0.08,1,ph+Math.PI); leg(0.18,1,ph);
-  c.save(); c.translate(0,-0.1*s);
-  iconCube(c,0.62*s,p,f,c1,c2);
+  function leg(cmds,px,py,ang,dy,hl,shade){
+    c.save();
+    c.translate(0,(dy/316*0.74)*s);
+    c.translate(X(px),Y(py)); c.rotate(ang); c.translate(-X(px),-Y(py));
+    trace(cmds); c.fillStyle=c2; c.fill();
+    if(shade){ c.fillStyle='rgba(0,0,0,'+shade+')'; c.fill(); }
+    c.stroke();
+    if(hl){
+      c.strokeStyle='rgba(255,255,255,0.4)'; c.lineWidth=2.2;
+      c.beginPath(); c.moveTo(X(hl[0]),Y(hl[1])); c.quadraticCurveTo(X(hl[2]),Y(hl[3]),X(hl[4]),Y(hl[5])); c.stroke();
+    }
+    c.restore();
+  }
+  const L1=[['M',105,140],['Q',15,180,22,303],['Q',90,240,165,160]];
+  const L2=[['M',172,190],['Q',178,138,228,138],['Q',282,140,280,180],['Q',272,240,206,308],['L',168,308],['Q',160,250,172,190]];
+  const L3=[['M',264,230],['Q',262,215,305,222],['Q',350,222,350,240],['L',336,305],['L',272,305]];
+  const L4=[['M',398,215],['Q',404,152,448,152],['Q',495,155,490,210],['Q',495,262,472,306],['L',428,306],['Q',420,255,398,215]];
+  let a1=0,a2=0,a3=0,a4=0,d1=0,d2=0,d3=0,d4=0;
+  if(A){
+    if(!air){
+      a1=0.12*Math.sin(ph); a2=0.12*Math.sin(ph+Math.PI);
+      a3=0.1*Math.sin(ph+1.6); a4=0.12*Math.sin(ph+Math.PI*1.5);
+      d1=-Math.max(0,Math.sin(ph))*30; d2=-Math.max(0,Math.sin(ph+Math.PI))*30;
+      d3=-Math.max(0,Math.sin(ph+1.6))*22; d4=-Math.max(0,Math.sin(ph+Math.PI*1.5))*30;
+    } else { a1=-0.3; a2=-0.12; a3=0.1; a4=0.3; d1=-55; d2=-48; d3=-40; d4=-52; }
+  }
+  // body shape variants (6 skins patterns)
+  const BV=[[95,230,135],[55,232,142],[150,230,118],[120,205,150],[75,252,128],[108,218,96]][p%6];
+  const ax=BV[0], fx=BV[1], fy=BV[2];
+  const body=[['M',ax,5],['L',440,5],['L',440,180],['L',388,220],['L',285,195],['L',fx,fy]];
+  // back legs first
+  leg(L3,305,225,a3,d3,null,0.4);
+  leg(L1,130,140,a1,d1,[95,155,40,185,38,260],0.15);
+  // body
+  trace(body); c.fillStyle=c1; c.fill();
+  c.save(); c.clip();
+  c.fillStyle='rgba(0,0,0,0.2)';
+  trace([['M',ax,5],['L',228,5],['L',228,fy],['L',fx,fy]]); c.fill();
   c.restore();
+  trace(body); c.stroke();
+  // eye (5 variants)
+  const ex=343, ey=92;
+  if(f===1){
+    [[315,78],[388,78]].forEach(function(q){
+      c.fillStyle='#e6e6e6'; c.beginPath(); c.arc(X(q[0]),Y(q[1]),R(26),0,Math.PI*2); c.fill(); c.stroke();
+      c.fillStyle='#fff'; c.beginPath(); c.arc(X(q[0])-R(8),Y(q[1])-R(8),R(7),0,Math.PI*2); c.fill();
+    });
+  } else if(f===2){
+    c.fillStyle=ICON_DARK; iconRR(c,X(285),Y(62),R(150),R(55),R(14)); c.fill();
+    c.fillStyle='#e6e6e6';
+    iconRR(c,X(300),Y(76),R(46),R(18),R(5)); c.fill();
+    iconRR(c,X(366),Y(76),R(46),R(18),R(5)); c.fill();
+  } else if(f===4){
+    c.fillStyle='#e6e6e6'; iconRR(c,X(ex)-R(44),Y(ey)-R(44),R(88),R(88),R(14)); c.fill(); c.stroke();
+    c.fillStyle='#fff'; c.beginPath(); c.arc(X(ex)-R(16),Y(ey)-R(18),R(10),0,Math.PI*2); c.fill();
+  } else {
+    c.fillStyle='#e6e6e6'; c.beginPath(); c.arc(X(ex),Y(ey),R(46),0,Math.PI*2); c.fill();
+    c.lineWidth=5; c.stroke(); c.lineWidth=3;
+    c.fillStyle='#fff';
+    c.beginPath(); c.arc(X(ex)-R(14),Y(ey)-R(20),R(12),0,Math.PI*2); c.fill();
+    c.beginPath(); c.arc(X(ex)-R(30),Y(ey)+R(4),R(8),0,Math.PI*2); c.fill();
+    if(f===3){
+      c.fillStyle=ICON_DARK; c.beginPath(); c.arc(X(ex)+R(10),Y(ey)+R(4),R(18),0,Math.PI*2); c.fill();
+    }
+  }
+  // front legs over the body
+  leg(L2,225,145,a2,d2,[188,200,190,155,235,155],0);
+  leg(L4,445,155,a4,d4,[415,210,430,165,455,168],0.2);
 }
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
