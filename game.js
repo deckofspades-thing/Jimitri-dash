@@ -904,7 +904,7 @@ function spiderTeleport(){
   return true;
 }
 function toggleGravity(){ snapGravity(-gdir); }
-function miniScale(){ return mode==='spider' ? 0.5 : MINI_S; }
+function miniScale(){ return mode==='spider' ? 0.6 : MINI_S; }
 function syncPB(){
   const n=mini?B*miniScale():B;
   if(n===PB) return;
