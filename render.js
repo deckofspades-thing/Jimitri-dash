@@ -1419,7 +1419,7 @@ function iconSpider(c,s,p,f,c1,c2){
   }
   function leg(cmds,px,py,ang,dy,hl,shade){
     c.save();
-    c.translate(0,(dy/316*0.74)*s);
+    c.translate(0,(dy/303)*s);
     c.translate(X(px),Y(py)); c.rotate(ang); c.translate(-X(px),-Y(py));
     trace(cmds); c.fillStyle=c2; c.fill();
     if(shade){ c.fillStyle='rgba(0,0,0,'+shade+')'; c.fill(); }
