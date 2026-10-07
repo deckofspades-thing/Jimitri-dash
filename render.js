@@ -1401,7 +1401,6 @@ function iconRobot(c,s,p,f,c1,c2){
   leg(-0.10,c1,ft1,fk1,toe);
 }
 let spiderPose=null;
-let spiderPose=null;
 function iconSpider(c,s,p,f,c1,c2){
   const A=spiderPose;
   const ph=A?A.x*0.06:0, air=A?A.air:false;
