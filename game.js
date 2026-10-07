@@ -904,10 +904,16 @@ function spiderTeleport(){
   return true;
 }
 function toggleGravity(){ snapGravity(-gdir); }
+function miniScale(){ return mode==='spider' ? 0.5 : MINI_S; }
+function syncPB(){
+  const n=mini?B*miniScale():B;
+  if(n===PB) return;
+  const cy=P.y+PB/2; PB=n; P.y=cy-PB/2;
+}
 function setMini(on){
   if(mini===on) return;
   const cy=P.y+PB/2;
-  mini=on; PB=mini?B*MINI_S:B;
+  mini=on; PB=mini?B*miniScale():B
   P.y=cy-PB/2;
 }
 function enterPortal(m){
@@ -915,7 +921,7 @@ function enterPortal(m){
   else if(m==='gup') snapGravity(-1, false, true);
   else if(m==='mini') setMini(true);
   else if(m==='big') setMini(false);
-  else mode=m;
+  else { mode=m; syncPB(); }
 }
 function easeF(e,k){
   if(e===1) return 0.5-0.5*Math.cos(Math.PI*k);
@@ -1009,6 +1015,7 @@ function reset(){
   gdir=L.sgd?-1:1;
   P.y = gdir>0 ? groundY-PB : ceilingY();
   mode=L.sm||'cube'; speedMult=SPDS[L.ss!=null?L.ss:1].m; shipAnim=(mode==='ship'||mode==='ball'||mode==='wave')?1:0;
+  PB=mini?B*miniScale():B; P.y = gdir>0 ? groundY-PB : ceilingY();
   deadT=0; particles.length=0; flipQueued=false; gravSwing=0; dash=null;
   robotBoost=0;
   groupOff={}; groupLeg={}; groupTarget={}; groupTimed={}; moveAnims=[];
