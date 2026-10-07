@@ -10,8 +10,8 @@ const mainEl=$('mainmenu'), levelsEl=$('levelsscr'), onlineEl=$('onlinescr'),
       detailEl=$('detailscr'), iconsEl=$('iconscr'), iconTabs=$('icontabs'),
       iconGrid=$('icongrid'), edStopBtn=$('edstop');
 
-const ICON_MODES = ['cube','ship','ball','ufo','wave','robot'];
-const ICON_LABELS = {cube:'CUBE', ship:'SHIP', ball:'BALL', ufo:'UFO', wave:'WAVE', robot:'ROBOT', col:'COLORS'};
+const ICON_MODES = ['cube','ship','ball','ufo','wave','robot','spider'];
+const ICON_LABELS = {cube:'CUBE', ship:'SHIP', ball:'BALL', ufo:'UFO', wave:'WAVE', robot:'ROBOT', spider:'SPIDER', col:'COLORS'};
 const ICON_N = 30;
 const ICON_COLS=['#52e85c','#7dff3a','#c8ff2e','#ffe14d','#ffb340','#ff7a2f','#ff5050','#ff2e7a','#ff6f9d','#f05cff',
   '#b47cff','#7a5cff','#4f6bff','#4fc3ff','#2ee6ff','#44f0d2','#2eb87a','#1f8a3c','#ffffff','#c9ced8',
@@ -19,7 +19,7 @@ const ICON_COLS=['#52e85c','#7dff3a','#c8ff2e','#ffe14d','#ffb340','#ff7a2f','#f
 let iconMode = 'cube';
 let selectedIcons = loadIcons();
 function loadIcons(){
-   const base={cube:0, ship:0, ball:0, ufo:0, wave:0, robot:0, c1:0, c2:13, glow:0};
+  const base={cube:0, ship:0, ball:0, ufo:0, wave:0, robot:0, spider:0, c1:0, c2:13, glow:0};
   try{
     const saved=JSON.parse(localStorage.getItem('jd_icons')||'{}');
     ICON_MODES.forEach(function(m){ if(saved[m]!=null) base[m]=Math.max(0, Math.min(ICON_N-1, saved[m]|0)); });
@@ -129,7 +129,7 @@ const SPDS=[
 const KINDS=['spikes','blocks','portals','speeds','orbs','pads','decos','slopes','saws','triggers','starts'];
 const CH_BG=1000, CH_G=1001, CH_LINE=1002, CH_OBJ=1004;
 const CH_NAMES={1000:'BG',1001:'GROUND',1002:'LINE',1004:'OBJ'};
-const PORTAL_MODES=['cube','ship','ball','wave','gdown','gup','ufo','mini','big','robot'];
+const PORTAL_MODES=['cube','ship','ball','wave','gdown','gup','ufo','mini','big','robot','spider'];
 const ORB_KINDS=['y','p','b','r','k','d','g','q'];
 const PAD_KINDS=['y','p','b'];
 const DECO_MAX=42, DECO_TEXT=100;
@@ -139,7 +139,7 @@ const T_OUTLINE=10, T_LINES=11, T_D=12;
 const T_BRICKBG=24;
 const BG_NAMES=['CITY','SPACE','SYNTHWAVE','MOUNTAINS','OCEAN','HEX','CLOUDS','CIRCUIT','SQUARES','PLAIN'];
 const GR_NAMES=['CLASSIC','TILES','STRIPES','BRICKS','PLAIN'];
-const MODE_NAMES=['cube','ship','ball','ufo','wave','robot'];
+const MODE_NAMES=['cube','ship','ball','ufo','wave','robot','spider'];
 const SAW_R   = [0.92, 0.64, 0.44];
 const SAW_HIT = [0.58, 0.42, 0.29];
 
@@ -867,6 +867,41 @@ function snapGravity(newGdir, keepMomentum, swing){
   if(mode==='cube') P.rot=Math.round(P.rot/(Math.PI/2))*(Math.PI/2);
   else if(mode==='wave') P.rot=(held?-1:1)*gdir*Math.PI/4;
   else if(mode==='ship') P.rot=Math.atan2(P.vy, SPEED*speedMult*2.5);
+}
+function spiderTeleport(){
+  const bl=curL.blocks;
+  let y=null;
+  if(gdir>0){
+    let best=-1e9;
+    if(ceilingY() <= P.y+2) best=ceilingY();
+    for(let i=0;i<bl.length;i++){
+      const b=bl[i];
+      if(b._nc || isOff(b)) continue;
+      const cx=egx(b)+b._cx, cy=egy(b)+b._cy;
+      const L=(cx-b._hw)*B, R=(cx+b._hw)*B, BO=groundY-(cy-b._hh)*B;
+      if(P.x+PB-2 <= L || P.x+2 >= R) continue;
+      if(BO <= P.y+2 && BO > best) best=BO;
+    }
+    if(best>-1e9) y=best-1;
+  } else {
+    let best=1e9;
+    if(groundY >= P.y+PB-2) best=groundY;
+    for(let i=0;i<bl.length;i++){
+      const b=bl[i];
+      if(b._nc || isOff(b)) continue;
+      const cx=egx(b)+b._cx, cy=egy(b)+b._cy;
+      const L=(cx-b._hw)*B, R=(cx+b._hw)*B, T=groundY-(cy+b._hh)*B;
+      if(P.x+PB-2 <= L || P.x+2 >= R) continue;
+      if(T >= P.y+PB-2 && T < best) best=T;
+    }
+    if(best<1e9) y=best-PB+1;
+  }
+  if(y===null) return false;
+  burst(P.x+PB/2, P.y+PB/2, '190,90,255', 10);
+  P.y=y; P.vy=0; gdir=-gdir; gravSwing=0; P.rot=0;
+  burst(P.x+PB/2, P.y+PB/2, '190,90,255', 10);
+  orbSfx();
+  return true;
 }
 function toggleGravity(){ snapGravity(-gdir); }
 function setMini(on){
@@ -1899,6 +1934,12 @@ function step(){
       if(gdir>0){ if(P.vy >  mv) P.vy =  mv; }
       else { if(P.vy < -mv) P.vy = -mv; }
     }
+    } else if(mode==='spider'){
+    if(P.onGround && pressBuf>0 && spiderTeleport()) pressBuf=0;
+    P.vy += GRAV*gsw*gdir;
+    const mv=B*0.6;
+    if(gdir>0){ if(P.vy >  mv) P.vy =  mv; }
+    else { if(P.vy < -mv) P.vy = -mv; }
   } else if(mode==='ufo'){
     if(flipQueued){ P.vy = -JUMPV*0.86*jm*gdir; P.onGround=false; }
     P.vy += GRAV*gsw*gdir;
@@ -2095,6 +2136,14 @@ function step(){
       particles.push({x:P.x+PB*0.4, y:P.y+(gdir>0?PB:0),
         vx:-(1+Math.random()*2), vy:(gdir>0?1:-1)*(1+Math.random()),
         g:0, life:12, max:12, size:PB*0.12, col:'255,170,60'});
+    }
+   } else if(mode==='spider'){
+    P.rot=0;
+    if(P.onGround && ftick%3===0){
+      const py = gdir>0 ? P.y+PB-2 : P.y+2;
+      particles.push({x:P.x+3, y:py,
+        vx:-(1+Math.random()*2), vy:(gdir>0?-1:1)*(0.5+Math.random()*1.5),
+        g:0.1*gdir, life:18, max:18, size:PB*0.1, col:'200,140,255'});
     }
   } else if(P.onGround){
     const target = Math.round(P.rot/(Math.PI/2))*(Math.PI/2);
