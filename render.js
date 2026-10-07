@@ -980,6 +980,7 @@ function drawPortal(p){
             : p.m==='gdown' ? '70,150,255'
             : p.m==='gup' ? '255,225,77'
             : p.m==='ufo' ? '255,150,40'
+            : p.m==='spider' ? '170,70,255'
             : p.m==='robot' ? '235,235,245'
             : p.m==='mini' ? '255,110,210'
             : p.m==='big' ? '60,255,170'
@@ -1399,6 +1400,27 @@ function iconRobot(c,s,p,f,c1,c2){
   c.restore();
   leg(-0.10,c1,ft1,fk1,toe);
 }
+let spiderPose=null;
+function iconSpider(c,s,p,f,c1,c2){
+  const A=spiderPose;
+  const ph=A?A.x*0.06:0, air=A?A.air:false;
+  c.lineJoin='round'; c.lineCap='round';
+  function leg(hx,sg,a){
+    let kx=hx+sg*0.2, ky=0.0, fx=kx+sg*0.1, fy=0.5;
+    if(A && !air){ ky=-0.04*Math.sin(a); fx+=sg*0.05*Math.sin(a+1.2); fy=0.5-Math.max(0,Math.sin(a))*0.14; }
+    else if(A && air){ ky=-0.08; fx=kx+sg*0.16; fy=0.38; }
+    const pts=[[hx,0.08],[kx,ky],[fx,fy]];
+    [[ICON_DARK,0.12],[c2,0.065]].forEach(function(q){
+      c.strokeStyle=q[0]; c.lineWidth=q[1]*s;
+      c.beginPath(); c.moveTo(pts[0][0]*s,pts[0][1]*s); c.lineTo(pts[1][0]*s,pts[1][1]*s); c.lineTo(pts[2][0]*s,pts[2][1]*s); c.stroke();
+    });
+  }
+  leg(-0.08,-1,ph); leg(-0.18,-1,ph+Math.PI);
+  leg(0.08,1,ph+Math.PI); leg(0.18,1,ph);
+  c.save(); c.translate(0,-0.1*s);
+  iconCube(c,0.62*s,p,f,c1,c2);
+  c.restore();
+}
 function drawIconShape(c, iconType, idx, s, c1, c2){
   idx=Math.max(0, Math.min(ICON_N-1, idx|0));
   c1=c1||ICON_COLS[selectedIcons.c1]; c2=c2||ICON_COLS[selectedIcons.c2];
@@ -1409,6 +1431,7 @@ function drawIconShape(c, iconType, idx, s, c1, c2){
   else if(iconType==='ball') iconBall(c,s,p,f,c1,c2);
   else if(iconType==='ufo') iconUfo(c,s,p,f,c1,c2);
   else if(iconType==='robot') iconRobot(c,s,p,f,c1,c2);
+  else if(iconType==='spider') iconSpider(c,s,p,f,c1,c2);
   else iconCube(c,s,p,f,c1,c2);
   c.restore();
 }
@@ -1428,8 +1451,9 @@ function drawPlayer(){
   ctx.rotate(P.rot);
   ctx.scale(PB/B, gdir*PB/B);
   if(mode==='robot') robotPose={x:P.x, air:!P.onGround, vy:P.vy*gdir, boost:robotBoost>0};
+  if(mode==='spider') spiderPose={x:P.x, air:!P.onGround};
   drawFullIcon(ctx, mode, selectedIcons[mode]||0, B-4);
-  robotPose=null;
+  robotPose=null; spiderPose=null;
   ctx.restore();
 }
 function drawWaveTrail(){
