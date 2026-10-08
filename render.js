@@ -1405,9 +1405,10 @@ function iconSpider(c,s,p,f,c1,c2){
   const A=spiderPose;
   const ph=A?A.x*0.06:0, air=A?A.air:false;
   c.lineJoin='round'; c.lineCap='round'; c.lineWidth=3; c.strokeStyle=ICON_DARK;
-  function X(ix){ return ((ix-15)/480-0.5)*s; }
-  function Y(iy){ return ((iy-5)/303-0.5)*s; }
-  function R(r){ return r/480*s; }
+  const K=s/303;
+  function X(ix){ return (ix-255)*K; }
+  function Y(iy){ return (iy-156.5)*K; }
+  function R(r){ return r*K; }
   function trace(cmds){
     c.beginPath();
     cmds.forEach(function(q){
